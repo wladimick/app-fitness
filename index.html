@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DeFatFit</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DeFatFit">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="description" content="Tu guía de vida fitness">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+<link href="css/base.css" rel="stylesheet">
+<link href="css/layout.css" rel="stylesheet">
+<link href="css/components.css" rel="stylesheet">
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+<!-- JS base (orden importa) -->
+<script src="js/supabase.js"  defer></script>
+<script src="js/utils.js"     defer></script>
+<script src="js/data.js"      defer></script>
+<script src="js/tips.js"      defer></script>
+<script src="js/router.js"    defer></script>
+<script src="js/auth.js"      defer></script>
+
+<!-- Screens -->
+<script src="screens/onboarding.js"    defer></script>
+<script src="screens/inicio.js"        defer></script>
+<script src="screens/alimentacion.js"  defer></script>
+<script src="screens/rutina.js"        defer></script>
+<script src="screens/calendario.js"    defer></script>
+<script src="screens/perfil-fisico.js" defer></script>
+<script src="screens/recomendar.js"    defer></script>
+<script src="screens/perfil-usuario.js"defer></script>
+<script src="screens/admin.js"         defer></script>
+</head>
+<body class="auth-mode">
+
+<!-- ═══════════════════════════════════
+     LOGIN
+═══════════════════════════════════ -->
+<div id="screen-login" class="auth-screen">
+  <div class="auth-card">
+    <img src="icon-192.png" alt="DeFatFit" class="auth-logo">
+    <div class="auth-kicker">DeFatFit</div>
+    <h1 id="auth-title">Iniciar sesión</h1>
+    <p id="auth-subtitle">Accede a tu planificación, rutina del día y métricas Body Pro.</p>
+
+    <form id="form-login" class="auth-form" onsubmit="handleLogin(event)">
+      <label>Email</label>
+      <input id="login-email" type="email" autocomplete="email" required placeholder="tu@email.com">
+      <label>Contraseña</label>
+      <input id="login-password" type="password" autocomplete="current-password" required placeholder="••••••••">
+      <button class="btn-primary auth-submit" type="submit">Entrar</button>
+      <button class="auth-link" type="button" onclick="toggleAuthMode('registro')">Crear cuenta nueva</button>
+    </form>
+
+    <form id="form-registro" class="auth-form" onsubmit="handleRegistro(event)" style="display:none">
+      <label>Nombre</label>
+      <input id="registro-nombre" type="text" autocomplete="name" required placeholder="Tu nombre">
+      <label>Email</label>
+      <input id="registro-email" type="email" autocomplete="email" required placeholder="tu@email.com">
+      <label>Contraseña</label>
+      <input id="registro-password" type="password" autocomplete="new-password" required minlength="6" placeholder="mínimo 6 caracteres">
+      <button class="btn-primary auth-submit" type="submit">Crear cuenta</button>
+      <button class="auth-link" type="button" onclick="toggleAuthMode('login')">Ya tengo cuenta</button>
+    </form>
+
+    <div id="auth-message" class="auth-message"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ONBOARDING
+═══════════════════════════════════ -->
+<div id="screen-onboarding" class="onboarding-screen">
+  <div class="onboarding-progress">
+    <div class="onboarding-progress-bar" id="ob-progress-bar" style="width:0%"></div>
+  </div>
+
+  <!-- Step 1: Datos básicos -->
+  <div class="onboarding-step active" id="ob-step-1">
+    <div class="onboarding-icon">👋</div>
+    <div class="onboarding-title">¡Bienvenido a<br>DeFatFit!</div>
+    <div class="onboarding-subtitle">Tu guía de vida fitness. Cuéntanos un poco de ti para personalizar tu experiencia.</div>
+    <div class="form-field">
+      <label class="form-label">¿Cómo te llamamos?</label>
+      <input class="form-input" id="ob-nombre" type="text" placeholder="Tu nombre" autocomplete="given-name">
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Fecha de nacimiento</label>
+        <input class="form-input" id="ob-fecha-nac" type="date">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Peso actual (kg)</label>
+        <input class="form-input" id="ob-peso" type="number" step="0.1" placeholder="75">
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Nivel -->
+  <div class="onboarding-step" id="ob-step-2">
+    <div class="onboarding-icon">📊</div>
+    <div class="onboarding-title">¿Cuál es tu nivel?</div>
+    <div class="onboarding-subtitle">Esto nos ayuda a sugerirte ejercicios y cargas apropiados para ti.</div>
+    <div class="onboarding-options">
+      <div class="onboarding-option" data-val="principiante" onclick="obSeleccionarOpcion(this,'ob-step-2')">
+        <span class="onboarding-option-icon">🌱</span>
+        <div>
+          <div>Principiante</div>
+          <div class="onboarding-option-sub">Menos de 1 año entrenando o retomando</div>
+        </div>
+      </div>
+      <div class="onboarding-option" data-val="intermedio" onclick="obSeleccionarOpcion(this,'ob-step-2')">
+        <span class="onboarding-option-icon">💪</span>
+        <div>
+          <div>Intermedio</div>
+          <div class="onboarding-option-sub">1-3 años con base sólida de ejercicios</div>
+        </div>
+      </div>
+      <div class="onboarding-option" data-val="avanzado" onclick="obSeleccionarOpcion(this,'ob-step-2')">
+        <span class="onboarding-option-icon">🏆</span>
+        <div>
+          <div>Avanzado</div>
+          <div class="onboarding-option-sub">3+ años, conozco bien mi cuerpo y cargas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Objetivo -->
+  <div class="onboarding-step" id="ob-step-3">
+    <div class="onboarding-icon">🎯</div>
+    <div class="onboarding-title">¿Cuál es tu objetivo principal?</div>
+    <div class="onboarding-subtitle">Podemos trabajar varios a la vez, pero elige el que más te motiva ahora.</div>
+    <div class="onboarding-options">
+      <div class="onboarding-option" data-val="Perder grasa y definir" onclick="obSeleccionarOpcion(this,'ob-step-3')">
+        <span class="onboarding-option-icon">🔥</span>
+        <div>
+          <div>Perder grasa y definir</div>
+          <div class="onboarding-option-sub">Reducir % de grasa y marcar el cuerpo</div>
+        </div>
+      </div>
+      <div class="onboarding-option" data-val="Ganar músculo e hipertrofia" onclick="obSeleccionarOpcion(this,'ob-step-3')">
+        <span class="onboarding-option-icon">💪</span>
+        <div>
+          <div>Ganar músculo e hipertrofia</div>
+          <div class="onboarding-option-sub">Aumentar masa muscular y volumen</div>
+        </div>
+      </div>
+      <div class="onboarding-option" data-val="Aumentar fuerza" onclick="obSeleccionarOpcion(this,'ob-step-3')">
+        <span class="onboarding-option-icon">🏋️</span>
+        <div>
+          <div>Aumentar fuerza</div>
+          <div class="onboarding-option-sub">Levantar más peso en ejercicios básicos</div>
+        </div>
+      </div>
+      <div class="onboarding-option" data-val="Calistenia y funcional" onclick="obSeleccionarOpcion(this,'ob-step-3')">
+        <span class="onboarding-option-icon">🤸</span>
+        <div>
+          <div>Calistenia y funcional</div>
+          <div class="onboarding-option-sub">Dominadas, fondos, muscle-up, movilidad</div>
+        </div>
+      </div>
+      <div class="onboarding-option" data-val="Salud y bienestar general" onclick="obSeleccionarOpcion(this,'ob-step-3')">
+        <span class="onboarding-option-icon">❤️</span>
+        <div>
+          <div>Salud y bienestar general</div>
+          <div class="onboarding-option-sub">Sentirme mejor, más energía y hábitos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Frecuencia -->
+  <div class="onboarding-step" id="ob-step-4">
+    <div class="onboarding-icon">📅</div>
+    <div class="onboarding-title">¿Cuántos días a la semana puedes entrenar?</div>
+    <div class="onboarding-subtitle">Sé realista. Es mejor comprometerse con 3 días y cumplirlos que planear 6 y fallar.</div>
+    <div class="onboarding-options">
+      <div class="onboarding-option" data-val="2" onclick="obSeleccionarOpcion(this,'ob-step-4')">
+        <span class="onboarding-option-icon">2️⃣</span>
+        <div><div>2 días</div><div class="onboarding-option-sub">Rutina full body, máximo impacto</div></div>
+      </div>
+      <div class="onboarding-option" data-val="3" onclick="obSeleccionarOpcion(this,'ob-step-4')">
+        <span class="onboarding-option-icon">3️⃣</span>
+        <div><div>3 días</div><div class="onboarding-option-sub">La frecuencia ideal para la mayoría</div></div>
+      </div>
+      <div class="onboarding-option" data-val="4" onclick="obSeleccionarOpcion(this,'ob-step-4')">
+        <span class="onboarding-option-icon">4️⃣</span>
+        <div><div>4 días</div><div class="onboarding-option-sub">Dividir por grupos musculares</div></div>
+      </div>
+      <div class="onboarding-option" data-val="5" onclick="obSeleccionarOpcion(this,'ob-step-4')">
+        <span class="onboarding-option-icon">5️⃣</span>
+        <div><div>5 o más días</div><div class="onboarding-option-sub">Alta frecuencia con buen descanso</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Listo -->
+  <div class="onboarding-step" id="ob-step-5">
+    <div class="onboarding-icon">🚀</div>
+    <div class="onboarding-title">¡Todo listo!</div>
+    <div class="onboarding-subtitle">Tu perfil está configurado. La app te guiará desde hoy con rutinas, tips y seguimiento de tu progreso.</div>
+    <div style="background:var(--card);border:1px solid rgba(200,241,53,.2);border-radius:var(--r2);padding:20px;margin-bottom:24px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Lo que viene</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:12px;align-items:center"><span style="font-size:20px">💡</span><span style="font-size:14px">Tips de salud y educación fitness cada día</span></div>
+        <div style="display:flex;gap:12px;align-items:center"><span style="font-size:20px">🏋️</span><span style="font-size:14px">Rutinas con Plan A (máquina) y Plan B (mancuernas)</span></div>
+        <div style="display:flex;gap:12px;align-items:center"><span style="font-size:20px">📊</span><span style="font-size:14px">Seguimiento de tu composición corporal</span></div>
+        <div style="display:flex;gap:12px;align-items:center"><span style="font-size:20px">🔥</span><span style="font-size:14px">Rachas y logros para mantenerte motivado</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer con botones -->
+  <div class="onboarding-footer">
+    <button class="btn-ghost" id="ob-btn-antes" onclick="obAnterior()" style="visibility:hidden">← Atrás</button>
+    <button class="btn-primary" onclick="obSiguiente()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════ -->
+<div id="sidebar-overlay" aria-hidden="true"></div>
+<aside id="sidebar" aria-hidden="true" aria-label="Menú principal">
+  <div class="sidebar-header">
+    <button class="sidebar-close" type="button" onclick="closeSidebar()" aria-label="Cerrar menú"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="sidebar-avatar" id="sidebar-avatar-text">?</div>
+    <div class="sidebar-name" id="sidebar-name">Usuario</div>
+    <div class="sidebar-email" id="sidebar-email"></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <div class="sidebar-item active" onclick="goScreen('screen-inicio')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/></svg></span><span>Inicio</span>
+    </div>
+    <div class="sidebar-item" onclick="goScreen('screen-rutina')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5 17.5 17.5"/><path d="M3.5 8.5 8.5 3.5"/><path d="M15.5 20.5l5-5"/><path d="M5 10 10 5"/><path d="M14 19l5-5"/><path d="M9 14l5-5"/></svg></span><span>Rutina del día</span>
+    </div>
+    <div class="sidebar-item" onclick="goScreen('screen-calendario')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg></span><span>Calendario</span>
+    </div>
+    <div class="sidebar-item" onclick="goScreen('screen-perfil')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="12" width="3" height="5" rx="1"/><rect x="12" y="8" width="3" height="9" rx="1"/><rect x="17" y="10" width="3" height="7" rx="1"/></svg></span><span>Progreso Body Pro</span>
+    </div>
+    <div class="sidebar-item" onclick="goScreen('screen-recomendar')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 15.5c-1.6-1.2-2.5-3-2.5-5A6 6 0 0 1 18 10.5c0 2-.9 3.8-2.5 5-.7.5-1.1 1.3-1.1 2.1h-4.8c0-.8-.4-1.6-1.1-2.1Z"/></svg></span><span>Recomendar rutina</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Próximamente</div>
+    <div class="sidebar-item" onclick="showToast('🔜 Explorador de cuerpo — Sprint 2')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-9.2-9A5.4 5.4 0 0 1 12 6a5.4 5.4 0 0 1 9.2 6c-2.2 4.6-9.2 9-9.2 9Z"/></svg></span><span>Explorador de cuerpo</span>
+      <span class="sidebar-item-badge soon">Pronto</span>
+    </div>
+    <div class="sidebar-item" onclick="showToast('🔜 Biblioteca de ejercicios — Sprint 2')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/><path d="M8 7h8M8 11h8"/></svg></span><span>Biblioteca de ejercicios</span>
+      <span class="sidebar-item-badge soon">Pronto</span>
+    </div>
+    <div class="sidebar-item" onclick="showToast('🔜 Comunidad — Sprint 3')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 19c0-2.2-1.8-4-4-4s-4 1.8-4 4"/><circle cx="12" cy="9" r="3"/><path d="M20 18c0-1.7-1.1-3.1-2.7-3.7"/><path d="M17 6.3a2.5 2.5 0 0 1 0 5"/><path d="M4 18c0-1.7 1.1-3.1 2.7-3.7"/><path d="M7 6.3a2.5 2.5 0 0 0 0 5"/></svg></span><span>Comunidad del gym</span>
+      <span class="sidebar-item-badge soon">Pronto</span>
+    </div>
+    <div class="sidebar-item" onclick="showToast('🔜 Logros — Sprint 2')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0z"/><path d="M8 6H5a2 2 0 0 0 0 4h3"/><path d="M16 6h3a2 2 0 0 1 0 4h-3"/><path d="M12 12v5"/><path d="M9 21h6"/><path d="M10 17h4"/></svg></span><span>Logros y rachas</span>
+      <span class="sidebar-item-badge soon">Pronto</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="sidebar-admin-section" style="display:none">
+    <div class="sidebar-section-label">Administrador</div>
+    <div class="sidebar-item" onclick="goScreen('screen-admin')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3.5-.2-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V22h-4v-.3a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.2.1-2-3.5.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.5-1H3v-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7l2-3.5.2.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V2h4v.3a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.2-.1 2 3.5-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.5v4h-.5a1.7 1.7 0 0 0-1.1 1Z"/></svg></span><span>Panel admin</span>
+      <span class="sidebar-item-badge">Admin</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-item" onclick="goScreen('screen-usuario')">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span><span>Mi perfil</span>
+    </div>
+    <div class="sidebar-item" onclick="logout()" style="color:var(--red)">
+      <span class="sidebar-item-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8"/><path d="M7 6.5a8 8 0 1 0 10 0"/></svg></span><span>Cerrar sesión</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════
+     APP SHELL
+═══════════════════════════════════ -->
+<div id="app-shell" style="display:none">
+
+<!-- ── INICIO ── -->
+<div id="screen-inicio" class="screen active">
+  <div class="topbar">
+    <div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:2px" id="dash-saludo">Buenos días 👋</div>
+      <div class="greeting-name" id="dash-nombre">…</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn menu-btn" onclick="openSidebar()" title="Menú" aria-label="Abrir menú" aria-expanded="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Hero rutina del día -->
+  <div class="hero-card" onclick="goScreen('screen-rutina')">
+    <div class="hero-card-tag" id="dash-rutina-tag">📅 HOY</div>
+    <div class="hero-card-title" id="dash-rutina-nombre">—</div>
+    <div class="hero-card-meta">
+      <span>⏱ <span id="dash-duracion">—</span></span>
+      <span>💪 <span id="dash-grupo">—</span></span>
+      <span>🔥 <span id="dash-nivel-badge">—</span></span>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Progreso de hoy</div>
+      <div class="prog-wrap"><div class="prog-bar" id="dash-prog" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px" id="dash-prog-label">0 / 0 ejercicios</div>
+    </div>
+    <button class="btn-primary">▶ Iniciar rutina</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-mini">
+      <div class="stat-mini-val" id="dash-racha">0</div>
+      <div class="stat-mini-lbl">Días racha</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-val" id="dash-semana">—</div>
+      <div class="stat-mini-lbl">Esta semana</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-val" id="dash-peso">—</div>
+      <div class="stat-mini-lbl">Peso kg</div>
+    </div>
+  </div>
+
+  <!-- Alimentación de hoy -->
+  <div class="food-summary-card" id="dash-alimentacion-card" onclick="goScreen('screen-alimentacion')">
+    <div class="food-summary-main">
+      <div class="food-summary-ring" id="dash-food-ring" style="--p:0">
+        <span id="dash-food-pct">0%</span>
+      </div>
+      <div class="food-summary-copy">
+        <div class="food-summary-kicker">Plan nutricionista</div>
+        <div class="food-summary-title">Alimentación de hoy</div>
+        <div class="food-summary-sub" id="dash-food-sub">Registra tus porciones y agua</div>
+      </div>
+    </div>
+    <div class="food-summary-footer">
+      <div class="food-water-mini" id="dash-food-water">
+        <span class="food-water-dot"></span><span class="food-water-dot"></span><span class="food-water-dot"></span><span class="food-water-dot"></span>
+        <span class="food-water-dot"></span><span class="food-water-dot"></span><span class="food-water-dot"></span><span class="food-water-dot"></span>
+        <span class="food-water-dot"></span><span class="food-water-dot"></span><span class="food-water-dot"></span><span class="food-water-dot"></span>
+      </div>
+      <span class="food-summary-cta">Registrar <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+    </div>
+  </div>
+
+  <!-- Tip del día -->
+  <div class="tip-card" id="tip-del-dia">
+    <div class="tip-icon">💡</div>
+    <div><div class="tip-label">Cargando tip…</div></div>
+  </div>
+
+  <!-- Acceso rápido -->
+  <div class="sec-label">Acceso rápido</div>
+  <div class="quick-grid">
+    <div class="quick-card" onclick="goScreen('screen-calendario')">
+      <div class="quick-card-icon">📆</div>
+      <div class="quick-card-label">Calendario</div>
+      <div class="quick-card-sub">Ver planificación</div>
+    </div>
+    <div class="quick-card" onclick="goScreen('screen-recomendar')">
+      <div class="quick-card-icon">💡</div>
+      <div class="quick-card-label">Recomendar</div>
+      <div class="quick-card-sub">¿Qué entreno hoy?</div>
+    </div>
+    <div class="quick-card" onclick="goScreen('screen-perfil')">
+      <div class="quick-card-icon">📊</div>
+      <div class="quick-card-label">Body Pro</div>
+      <div class="quick-card-sub">Mediciones físicas</div>
+    </div>
+    <div class="quick-card" onclick="goScreen('screen-usuario')">
+      <div class="quick-card-icon">👤</div>
+      <div class="quick-card-label">Mi Perfil</div>
+      <div class="quick-card-sub">Datos y marcas</div>
+    </div>
+  </div>
+  <div style="height:8px"></div>
+</div>
+
+<!-- ── ALIMENTACIÓN ── -->
+<div id="screen-alimentacion" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">Alimentación</div>
+      <div style="font-size:13px;color:var(--muted)">Tracker de porciones diarias</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="goScreen('screen-inicio')" aria-label="Volver al inicio"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18 9 12l6-6"/></svg></button>
+      <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú" aria-expanded="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+
+  <div class="food-context-card">
+    <div class="food-context-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M6.5 8.5c2.7 0 5.5-2.2 5.5-5.5 0 3.3 2.8 5.5 5.5 5.5"/><path d="M5 15c3.4 0 7-2.9 7-7 0 4.1 3.6 7 7 7"/></svg></div>
+    <div>
+      <div class="food-context-label" id="food-day-label">Hoy</div>
+      <div class="food-context-text" id="food-context-text">Mantén el plan simple y registra tus grupos.</div>
+    </div>
+  </div>
+
+  <div class="food-progress-hero">
+    <div class="food-big-ring" id="food-big-ring" style="--p:0">
+      <span id="food-big-pct">0%</span>
+    </div>
+    <div>
+      <div class="food-progress-title">Progreso del día</div>
+      <div class="food-progress-sub" id="food-progress-sub">0 de 7 grupos completos</div>
+      <div class="food-progress-note" id="food-progress-note">Meta: porciones + 11 vasos de agua</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Agua</div>
+  <div class="food-water-card">
+    <div class="food-water-head">
+      <div>
+        <div class="food-section-title">Tracker de agua</div>
+        <div class="food-section-sub">Meta mínima: 11 vasos · aprox. 2,3 litros</div>
+      </div>
+      <div class="food-water-count" id="food-water-count">0 / 11</div>
+    </div>
+    <div class="food-cups" id="food-cups"></div>
+  </div>
+
+  <div class="sec-label">Porciones del plan</div>
+  <div id="food-portion-list"></div>
+
+  <div class="food-actions">
+    <button class="btn-primary" onclick="alimentacionGuardar()">Guardar alimentación de hoy</button>
+  </div>
+  <div style="height:22px"></div>
+</div>
+
+<!-- ── CALENDARIO ── -->
+<div id="screen-calendario" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">DeFatFit</div>
+      <div style="font-size:13px;color:var(--muted)" id="cal-mes-label">Mayo 2026</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú" aria-expanded="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <div class="cal-mode-toggle">
+    <button class="toggle-btn active" id="btn-semana" onclick="calMode('semana')">Semana</button>
+    <button class="toggle-btn" id="btn-mes" onclick="calMode('mes')">Mes</button>
+  </div>
+  <div id="cal-semana">
+    <div class="week-days" id="week-grid"></div>
+    <div class="divider"></div>
+    <div class="sec-label">Esta semana</div>
+    <div id="week-rutinas"></div>
+  </div>
+  <div id="cal-mes" style="display:none">
+    <div class="month-grid">
+      <div class="month-header">
+        <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+      </div>
+      <div class="month-cells" id="month-cells"></div>
+    </div>
+  </div>
+  <div class="cal-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(200,241,53,.3)"></div>Completado</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(0,229,255,.2)"></div>Pendiente</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--bg3)"></div>Descanso</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(255,71,87,.2)"></div>Perdido</div>
+  </div>
+  <div style="height:8px"></div>
+</div>
+
+<!-- ── RUTINA ── -->
+<div id="screen-rutina" class="screen">
+  <div class="rutina-header">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px" id="rutina-dia-tag">📅 HOY</div>
+    <div class="rutina-title" id="rutina-titulo">—</div>
+    <div class="rutina-meta" id="rutina-meta"></div>
+  </div>
+  <div class="edit-mode-bar" id="edit-mode-bar">
+    <span class="edit-mode-label">✏️ Modo edición activo</span>
+    <button class="btn-secondary" style="padding:8px 16px;font-size:13px" onclick="toggleEditMode()">Listo ✓</button>
+  </div>
+  <div style="display:flex;gap:10px;padding:0 16px;margin-bottom:14px">
+    <button class="btn-secondary" style="flex:1;justify-content:center;font-size:13px" id="btn-toggle-edit" onclick="toggleEditMode()">✏️ Editar rutina</button>
+    <button class="btn-secondary" style="padding:12px 16px;font-size:16px" onclick="resetRutina()" title="Reiniciar">↺</button>
+  </div>
+  <div id="ejercicios-list"></div>
+  <button class="add-ej-btn" id="add-ej-btn" onclick="abrirAgregarEjercicio()">＋ Agregar ejercicio</button>
+  <div class="rutina-actions">
+    <button class="btn-primary" style="flex:1;justify-content:center" onclick="completarRutina()">✓ Guardar rutina</button>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+<!-- ── PROGRESO / BODY PRO ── -->
+<div id="screen-perfil" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">Body Pro</div>
+      <div style="font-size:13px;color:var(--muted)">Seguimiento físico</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="abrirNuevaMedicion?.()" aria-label="Agregar medición"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú" aria-expanded="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <div class="bodypro-hero">
+    <div class="bodypro-fecha" id="bp-fecha"></div>
+    <div class="bodypro-peso" id="bp-peso"></div>
+    <div class="bodypro-delta" id="bp-delta"></div>
+  </div>
+  <div class="sec-label">Indicadores</div>
+  <div class="metrics-grid" id="metrics-grid"></div>
+  <div class="divider"></div>
+  <div class="sec-label">Composición corporal</div>
+  <div class="chart-bar-wrap" id="chart-bars"></div>
+  <div class="divider"></div>
+  <div class="sec-label">Historial</div>
+  <div class="card" style="margin-bottom:0"><div id="hist-list"></div></div>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ── RECOMENDAR ── -->
+<div id="screen-recomendar" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">Recomendar</div>
+      <div style="font-size:13px;color:var(--muted)">¿Qué entrenas hoy?</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú" aria-expanded="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <div class="sec-label">Tu nivel</div>
+  <div class="nivel-row">
+    <div class="nivel-chip active" onclick="setNivel('principiante',this)">Principiante</div>
+    <div class="nivel-chip" onclick="setNivel('intermedio',this)">Intermedio</div>
+    <div class="nivel-chip" onclick="setNivel('avanzado',this)">Avanzado</div>
+  </div>
+  <div class="sec-label">Selecciona músculos</div>
+  <div class="muscle-grid">
+    <div class="muscle-btn" data-m="pecho"   onclick="toggleMuscle(this)"><div class="muscle-btn-icon">💪</div><div class="muscle-btn-name">Pecho</div><div class="muscle-btn-sub">Pectoral mayor · menor</div></div>
+    <div class="muscle-btn" data-m="espalda" onclick="toggleMuscle(this)"><div class="muscle-btn-icon">🏛</div><div class="muscle-btn-name">Espalda</div><div class="muscle-btn-sub">Dorsal · Trapecio</div></div>
+    <div class="muscle-btn" data-m="piernas" onclick="toggleMuscle(this)"><div class="muscle-btn-icon">🦵</div><div class="muscle-btn-name">Piernas</div><div class="muscle-btn-sub">Cuádriceps · Femoral</div></div>
+    <div class="muscle-btn" data-m="hombros" onclick="toggleMuscle(this)"><div class="muscle-btn-icon">🔱</div><div class="muscle-btn-name">Hombros</div><div class="muscle-btn-sub">Deltoides · Manguito</div></div>
+    <div class="muscle-btn" data-m="brazos"  onclick="toggleMuscle(this)"><div class="muscle-btn-icon">💎</div><div class="muscle-btn-name">Brazos</div><div class="muscle-btn-sub">Bíceps · Tríceps</div></div>
+    <div class="muscle-btn" data-m="abdomen" onclick="toggleMuscle(this)"><div class="muscle-btn-icon">⬡</div><div class="muscle-btn-name">Abdomen</div><div class="muscle-btn-sub">Core · Oblicuos</div></div>
+  </div>
+  <button class="full-body-btn" data-m="full_body" onclick="toggleFullBody(this)">
+    <div class="full-body-btn-icon">🌐</div>
+    <div><div class="full-body-btn-name">Full Body</div><div class="full-body-btn-sub">Ejercicios básicos · Cuerpo completo</div></div>
+  </button>
+  <div class="rec-generate">
+    <button class="btn-primary" style="width:100%;justify-content:center" onclick="generarRec()">⚡ Generar rutina sugerida</button>
+  </div>
+  <div id="rec-result"></div>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ── PERFIL USUARIO ── -->
+<div id="screen-usuario" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">Mi Perfil</div>
+      <div style="font-size:13px;color:var(--muted)">Datos personales</div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="abrirEditarPerfil()" aria-label="Editar perfil"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="M13.5 6.5l4 4"/></svg></button>
+      <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú" aria-expanded="false"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+
+  <div class="perfil-hero">
+    <div class="perfil-hero-top">
+      <div class="perfil-avatar" id="perfil-avatar">?</div>
+      <div>
+        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:1px" id="perfil-nombre"></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px" id="perfil-nivel-obj"></div>
+      </div>
+    </div>
+    <div class="perfil-badges">
+      <span class="badge badge-green"  id="perfil-badge-nivel"></span>
+      <span class="badge badge-blue"   id="perfil-badge-freq"></span>
+      <span class="badge badge-gray"   id="perfil-badge-tipo"></span>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-mini"><div class="stat-mini-val" id="perfil-peso">—</div><div class="stat-mini-lbl">Peso kg</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" id="perfil-edad">—</div><div class="stat-mini-lbl">Edad</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" id="perfil-dias">—</div><div class="stat-mini-lbl">Días/sem</div></div>
+  </div>
+
+  <div class="sec-label">Objetivo</div>
+  <div class="card" style="font-size:14px;line-height:1.6" id="perfil-objetivo">—</div>
+
+  <div class="sec-label">Distribución semanal</div>
+  <div class="card" style="padding:12px 16px">
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Lunes</span><span style="font-size:14px;font-weight:700;color:var(--accent);cursor:pointer" onclick="cargarYVerRutina('torsoA')">Torso A — Fuerza Estética</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Martes</span><span style="font-size:14px;font-weight:700;color:var(--accent2);cursor:pointer" onclick="cargarYVerRutina('piernas')">Piernas — Sentadilla</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Miércoles</span><span style="font-size:14px;color:var(--muted)">Descanso</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Jueves</span><span style="font-size:14px;font-weight:700;color:var(--accent);cursor:pointer" onclick="cargarYVerRutina('torsoB')">Torso B — Tirón</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Vie / Sáb</span><span style="font-size:14px;font-weight:700;color:var(--accent);cursor:pointer" onclick="cargarYVerRutina('torsoC')">Torso C — Remate</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0"><span style="font-size:13px;color:var(--muted);width:90px">Domingo</span><span style="font-size:14px;color:var(--muted)">Descanso</span></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Marcas personales</div>
+  <div class="card" style="padding:12px 16px"><div id="perfil-marcas"></div></div>
+
+  <div style="padding:16px">
+    <button class="btn-primary" style="width:100%;justify-content:center" onclick="abrirEditarPerfil()">✏️ Editar perfil</button>
+  </div>
+  <div style="height:8px"></div>
+</div>
+
+<!-- ── ADMIN ── -->
+<div id="screen-admin" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">Admin</div>
+      <div style="font-size:13px;color:var(--muted)">Panel de control</div>
+    </div>
+    <div class="topbar-right">
+      <span class="badge badge-orange">Admin</span>
+      <button class="icon-btn" onclick="goScreen('screen-inicio')" aria-label="Cerrar admin"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+  </div>
+  <div class="admin-summary">
+    <div class="admin-sum-card"><div class="admin-sum-val" id="admin-total-usuarios">—</div><div class="admin-sum-lbl">Usuarios</div></div>
+    <div class="admin-sum-card"><div class="admin-sum-val" id="admin-activos-hoy">—</div><div class="admin-sum-lbl">Activos</div></div>
+    <div class="admin-sum-card"><div class="admin-sum-val" id="admin-adherencia">—</div><div class="admin-sum-lbl">Adherencia</div></div>
+  </div>
+  <div class="sec-label">Usuarios registrados</div>
+  <div id="admin-users"></div>
+  <div style="height:16px"></div>
+</div>
+
+</div><!-- /app-shell -->
+
+<!-- ═══════════════════════════════════
+     NAV INFERIOR
+═══════════════════════════════════ -->
+<nav id="bottom-nav" style="display:none">
+  <div class="nav-item active" data-screen="screen-inicio" onclick="goScreen('screen-inicio')"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/></svg></span><span>Inicio</span></div>
+  <div class="nav-item" data-screen="screen-calendario" onclick="goScreen('screen-calendario')"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg></span><span>Calendario</span></div>
+  <div class="nav-item" data-screen="screen-rutina" onclick="goScreen('screen-rutina')"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5 17.5 17.5"/><path d="M3.5 8.5 8.5 3.5"/><path d="M15.5 20.5l5-5"/><path d="M5 10 10 5"/><path d="M14 19l5-5"/><path d="M9 14l5-5"/></svg></span><span>Rutina</span></div>
+  <div class="nav-item" data-screen="screen-perfil" onclick="goScreen('screen-perfil')"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="12" width="3" height="5" rx="1"/><rect x="12" y="8" width="3" height="9" rx="1"/><rect x="17" y="10" width="3" height="7" rx="1"/></svg></span><span>Progreso</span></div>
+  <div class="nav-item" data-screen="screen-usuario" onclick="goScreen('screen-usuario')"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span><span>Perfil</span></div>
+</nav>
+
+<!-- ── TIMER ── -->
+<div id="rest-timer" onclick="skipTimer()">
+  <svg class="timer-ring" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+    <circle class="bg" cx="28" cy="28" r="24"/>
+    <circle class="fg" id="timer-ring-fg" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="0"/>
+  </svg>
+  <div class="timer-info">
+    <div class="timer-label">Descanso</div>
+    <div class="timer-count" id="timer-display">1:30</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MODALES
+═══════════════════════════════════ -->
+
+<!-- Modal calendario -->
+<div class="overlay" id="modal-cal" onclick="closeOverlay('modal-cal',event)">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="bodypro-fecha" id="modal-fecha"></div>
+    <div class="sheet-title" id="modal-rutina-nombre"></div>
+    <div id="modal-badges" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px"></div>
+    <div id="modal-ejercicios"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-primary" style="flex:1;justify-content:center" onclick="goScreen('screen-rutina');closeOverlay('modal-cal')">Ver rutina completa</button>
+      <button class="btn-secondary" onclick="closeOverlay('modal-cal')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar ejercicio -->
+<div class="overlay" id="modal-edit-ej" onclick="closeOverlay('modal-edit-ej',event)">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Editar ejercicio</div>
+    <input type="hidden" id="edit-ej-idx">
+    <div class="form-field"><label class="form-label">Nombre del ejercicio</label><input class="form-input" id="edit-nombre" type="text" placeholder="Ej: Press banca plano"></div>
+    <div class="form-field"><label class="form-label">Grupo muscular</label><input class="form-input" id="edit-grupo" type="text" placeholder="Ej: Pecho"></div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Series</label><input class="form-input" id="edit-series" type="number" min="1" max="10"></div>
+      <div class="form-field"><label class="form-label">Repeticiones</label><input class="form-input" id="edit-reps" type="text" placeholder="8-10"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Peso sugerido</label><input class="form-input" id="edit-peso" type="text" placeholder="80kg"></div>
+      <div class="form-field"><label class="form-label">Descanso (seg)</label><input class="form-input" id="edit-descanso" type="number" min="30" max="300"></div>
+    </div>
+    <div class="form-field"><label class="form-label">Nota táctica (opcional)</label><input class="form-input" id="edit-nota" type="text" placeholder="Consejo para el ejercicio"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeOverlay('modal-edit-ej')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEjercicio()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal agregar ejercicio -->
+<div class="overlay" id="modal-add-ej" onclick="closeOverlay('modal-add-ej',event)">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Agregar ejercicio</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Desde la base de datos</div>
+    <div id="add-ej-lista" style="max-height:35dvh;overflow-y:auto;margin-bottom:16px"></div>
+    <div class="divider"></div>
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">O crear ejercicio nuevo</div>
+    <div class="form-field"><label class="form-label">Nombre</label><input class="form-input" id="new-ej-nombre" type="text" placeholder="Nombre del ejercicio"></div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Series</label><input class="form-input" id="new-ej-series" type="number" value="3" min="1"></div>
+      <div class="form-field"><label class="form-label">Reps</label><input class="form-input" id="new-ej-reps" type="text" value="10-12"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Peso</label><input class="form-input" id="new-ej-peso" type="text" placeholder="Ej: 20kg"></div>
+      <div class="form-field"><label class="form-label">Descanso (s)</label><input class="form-input" id="new-ej-descanso" type="number" value="60"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeOverlay('modal-add-ej')">Cancelar</button>
+      <button class="btn-primary" onclick="crearEjercicioNuevo()">＋ Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar perfil -->
+<div class="overlay" id="modal-edit-perfil" onclick="closeOverlay('modal-edit-perfil',event)">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Editar perfil</div>
+    <div class="form-field"><label class="form-label">Nombre completo</label><input class="form-input" id="ep-nombre" type="text"></div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Peso (kg)</label><input class="form-input" id="ep-peso" type="number" step="0.1"></div>
+      <div class="form-field"><label class="form-label">Días/semana</label><input class="form-input" id="ep-freq" type="number" min="1" max="7"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Nivel</label>
+        <select class="form-input" id="ep-nivel">
+          <option value="principiante">Principiante</option>
+          <option value="intermedio">Intermedio</option>
+          <option value="avanzado">Avanzado</option>
+        </select>
+      </div>
+      <div class="form-field"><label class="form-label">Fecha de nac.</label><input class="form-input" id="ep-fecha-nac" type="date"></div>
+    </div>
+    <div class="form-field"><label class="form-label">Objetivo</label><input class="form-input" id="ep-objetivo" type="text"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeOverlay('modal-edit-perfil')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarPerfil()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ─── INIT ─── -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Cargar rutina del día en memoria
+  window._rutinaHoy = cargarRutinaLocal();
+
+  // Mostrar admin en sidebar si es admin
+  window._checkAdmin = () => {
+    const p = window.currentProfile;
+    if (p?.rol === 'admin') {
+      document.getElementById('sidebar-admin-section').style.display = '';
+    }
+  };
+
+  // Iniciar auth (carga sesión o muestra login)
+  initAuth();
+
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(e => console.log('SW:', e));
+  }
+});
+</script>
+
+<!-- Screens extras que aún no tienen archivo (usan inline mínimo) -->
+<script>
+// Calendario (versión simplificada para Sprint 1)
+function calMode(modo) {
+  document.getElementById('btn-semana').classList.toggle('active', modo==='semana');
+  document.getElementById('btn-mes').classList.toggle('active', modo==='mes');
+  document.getElementById('cal-semana').style.display = modo==='semana' ? '' : 'none';
+  document.getElementById('cal-mes').style.display    = modo==='mes'    ? '' : 'none';
+}
+
+function initCalendario() { buildWeek(); buildMonth(); }
+
+function buildWeek() {
+  const hoy = new Date();
+  const diaDeLaSemana = (hoy.getDay() + 6) % 7; // 0=lunes
+  const grid  = document.getElementById('week-grid');
+  const ruts  = document.getElementById('week-rutinas');
+  if (!grid || !ruts) return;
+  grid.innerHTML = ''; ruts.innerHTML = '';
+  const diasLabel = ['L','M','X','J','V','S','D'];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(hoy);
+    d.setDate(hoy.getDate() - diaDeLaSemana + i);
+    const fecha = d.toISOString().split('T')[0];
+    const cal   = calendarioDias.find(c => c.fecha === fecha);
+    const foodReg = window.alimentacionObtenerRegistro?.(fecha);
+    const foodDone = foodReg ? window.alimentacionCalcularProgreso?.(foodReg)?.diaCompleto : false;
+    const esHoy = i === diaDeLaSemana;
+    const wd = document.createElement('div');
+    wd.className = 'week-day';
+    wd.innerHTML = `
+      <div class="week-day-label">${diasLabel[i]}</div>
+      <div class="week-day-num ${cal ? cal.estado : 'sin-rutina'}${esHoy ? ' hoy' : ''}"
+        onclick="${cal ? `abrirDia('${fecha}','${cal.resumen}','${cal.estado}')` : ''}">
+        ${d.getDate()}${foodDone ? '<span class="food-day-indicator" title="Alimentación completa"></span>' : ''}
+      </div>
+    `;
+    grid.appendChild(wd);
+  }
+  calendarioDias.slice(-5).forEach(d => {
+    const bc = {completado:'badge-green',pendiente:'badge-blue',descanso:'badge-gray',perdido:'badge-red'}[d.estado]||'badge-gray';
+    const lb = {completado:'Completado',pendiente:'Pendiente',descanso:'Descanso',perdido:'Perdido'}[d.estado]||d.estado;
+    const c  = document.createElement('div');
+    c.className = 'card card-clickable';
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${formatFecha(d.fecha)}</div>
+          <div style="font-size:16px;font-weight:700">${d.resumen}</div>
+        </div>
+        <span class="badge ${bc}">${lb}</span>
+      </div>`;
+    c.onclick = () => abrirDia(d.fecha, d.resumen, d.estado);
+    ruts.appendChild(c);
+  });
+}
+
+function buildMonth() {
+  const cells = document.getElementById('month-cells');
+  if (!cells) return;
+  cells.innerHTML = '';
+  const hoy  = new Date();
+  const year = hoy.getFullYear();
+  const mes  = hoy.getMonth();
+  const primerDia = new Date(year, mes, 1).getDay();
+  const inicio    = (primerDia + 6) % 7;
+  const diasEnMes = new Date(year, mes + 1, 0).getDate();
+
+  // Actualizar label
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const lbl = document.getElementById('cal-mes-label');
+  if (lbl) lbl.textContent = `${meses[mes]} ${year}`;
+
+  for (let i = 0; i < inicio; i++) {
+    const e = document.createElement('div'); e.className = 'month-cell empty'; cells.appendChild(e);
+  }
+  for (let d = 1; d <= diasEnMes; d++) {
+    const fecha = `${year}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cal   = calendarioDias.find(c => c.fecha === fecha);
+    const foodReg = window.alimentacionObtenerRegistro?.(fecha);
+    const foodDone = foodReg ? window.alimentacionCalcularProgreso?.(foodReg)?.diaCompleto : false;
+    const esHoy = d === hoy.getDate();
+    const e     = document.createElement('div');
+    e.className = `month-cell ${cal ? cal.estado : 'sin-rutina'}${esHoy ? ' hoy' : ''}${foodDone ? ' food-ok' : ''}`;
+    e.innerHTML = `${d}${foodDone ? '<span class="food-day-indicator" title="Alimentación completa"></span>' : ''}`;
+    if (cal) e.onclick = () => abrirDia(fecha, cal.resumen, cal.estado);
+    cells.appendChild(e);
+  }
+}
+
+function abrirDia(fecha, rutina, estado) {
+  document.getElementById('modal-fecha').textContent = formatFecha(fecha);
+  document.getElementById('modal-rutina-nombre').textContent = rutina;
+  const bc = {completado:'badge-green',pendiente:'badge-blue',descanso:'badge-gray',perdido:'badge-red'}[estado]||'badge-gray';
+  const lb = {completado:'Completado',pendiente:'Pendiente',descanso:'Descanso',perdido:'Perdido'}[estado]||estado;
+  document.getElementById('modal-badges').innerHTML = `<span class="badge ${bc}">${lb}</span>`;
+  const mDiv = document.getElementById('modal-ejercicios');
+  if (estado === 'descanso') {
+    mDiv.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:10px 0">Día de descanso. Sin ejercicios programados.</div>';
+  } else {
+    const r = window._rutinaHoy || defaultRutina();
+    mDiv.innerHTML = r.ejercicios.slice(0, 3).map(e => `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-weight:700;font-size:14px">${e.nombre}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${e.series} series · ${e.repeticiones} reps · ${e.pesoSugerido}</div>
+      </div>`).join('') + '<div style="font-size:12px;color:var(--muted);padding-top:8px">+ más en la rutina completa</div>';
+  }
+  openOverlay('modal-cal');
+}
+
+// Body Pro (versión Sprint 1)
+function initPerfil() {
+  const a = medidasCorporales[0], p = medidasCorporales[1];
+  document.getElementById('bp-fecha').textContent = 'Última medición: ' + a.fecha;
+  document.getElementById('bp-peso').innerHTML = `${a.peso}<span>kg</span>`;
+  const d = (a.peso - p.peso).toFixed(1), neg = d < 0;
+  const bp = document.getElementById('bp-delta');
+  bp.className = 'bodypro-delta ' + (neg ? 'delta-neg' : 'delta-pos');
+  bp.textContent = (neg ? '▼ ' : '▲ ') + Math.abs(d) + ' kg desde anterior';
+  const metricas = [
+    { label:'Grasa corporal', val:a.grasaCorporal, prev:p.grasaCorporal, unit:'%',   bajoEsMejor:true },
+    { label:'Masa muscular',  val:a.masaMuscular,  prev:p.masaMuscular,  unit:'kg',  bajoEsMejor:false },
+    { label:'Agua corporal',  val:a.aguaCorporal,  prev:p.aguaCorporal,  unit:'%',   bajoEsMejor:false },
+    { label:'Grasa visceral', val:a.grasaVisceral, prev:p.grasaVisceral, unit:'',    bajoEsMejor:true },
+    { label:'IMC',            val:a.imc,           prev:p.imc,           unit:'',    bajoEsMejor:true },
+    { label:'Metabolismo',    val:a.metabolismoBasal,prev:p.metabolismoBasal,unit:'kcal',bajoEsMejor:false },
+    { label:'Edad corporal',  val:a.edadCorporal,  prev:p.edadCorporal,  unit:'años',bajoEsMejor:true },
+  ];
+  const grid = document.getElementById('metrics-grid');
+  grid.innerHTML = '';
+  metricas.forEach(m => {
+    const d2=(m.val-m.prev).toFixed(1),mejor=m.bajoEsMejor?d2<0:d2>0,igual=d2==0;
+    const cc=igual?'comp-igual':mejor?'comp-mejor':'comp-peor';
+    const ct=igual?'= Sin cambio':(mejor?'▼ ':'▲ ')+Math.abs(d2)+' '+m.unit;
+    const card=document.createElement('div'); card.className='metric-card';
+    card.innerHTML=`<div class="metric-label">${m.label}</div><div class="metric-value">${m.val}<span> ${m.unit}</span></div><div class="metric-comp ${cc}">${ct}</div>`;
+    grid.appendChild(card);
+  });
+  const bars = document.getElementById('chart-bars');
+  bars.innerHTML = '';
+  [{label:'Masa muscular',val:a.masaMuscular,max:60,color:'var(--accent)'},{label:'Grasa corporal',val:a.grasaCorporal,max:40,color:'var(--orange)'},{label:'Agua corporal',val:a.aguaCorporal,max:80,color:'var(--accent2)'}].forEach(b=>{
+    bars.innerHTML+=`<div><div class="chart-bar-label"><span>${b.label}</span><span>${b.val}${b.label.includes('Agua')||b.label.includes('Grasa')?'%':' kg'}</span></div><div class="prog-wrap"><div class="prog-bar" style="width:${Math.round(b.val/b.max*100)}%;background:${b.color}"></div></div></div>`;
+  });
+  document.getElementById('hist-list').innerHTML = medidasCorporales.map(m=>
+    `<div class="hist-item"><div class="hist-date">${m.fecha}</div><div class="hist-vals">${m.peso}kg · ${m.grasaCorporal}% G · ${m.masaMuscular}kg M</div></div>`
+  ).join('');
+}
+window.initPerfil = initPerfil;
+
+// Recomendaciones (versión Sprint 1)
+let selectedMuscles=[], selectedNivel='principiante';
+function setNivel(n,el){ selectedNivel=n; document.querySelectorAll('.nivel-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+function toggleMuscle(el){ document.querySelector('.full-body-btn').classList.remove('selected'); selectedMuscles=selectedMuscles.filter(x=>x!=='full_body'); el.classList.toggle('selected'); if(el.classList.contains('selected')){ if(!selectedMuscles.includes(el.dataset.m)) selectedMuscles.push(el.dataset.m); } else selectedMuscles=selectedMuscles.filter(x=>x!==el.dataset.m); }
+function toggleFullBody(el){ document.querySelectorAll('.muscle-btn').forEach(b=>b.classList.remove('selected')); selectedMuscles=[]; el.classList.toggle('selected'); if(el.classList.contains('selected')) selectedMuscles=['full_body']; }
+function generarRec(){
+  if(!selectedMuscles.length){ showToast('Selecciona al menos un músculo'); return; }
+  const mult={principiante:.7,intermedio:1.0,avanzado:1.2}[selectedNivel];
+  let ejs=[]; selectedMuscles.forEach(m=>{ if(ejerciciosDB[m]) ejs=[...ejs,...ejerciciosDB[m]]; });
+  ejs=ejs.sort(()=>Math.random()-.5).slice(0,selectedMuscles[0]==='full_body'?6:Math.min(7,ejs.length));
+  const dur=Math.round(ejs.length*8*mult+10);
+  const nom=selectedMuscles.includes('full_body')?'Full Body':selectedMuscles.map(m=>capitalize(m)).join(' + ');
+  const res=document.getElementById('rec-result');
+  res.innerHTML=`
+    <div class="sec-label">Rutina sugerida</div>
+    <div class="card card-accent" style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⚡ GENERADA PARA TI</div>
+      <div style="font-family:var(--font-d);font-size:26px;letter-spacing:1px;margin-bottom:8px">${nom}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="badge badge-green">⏱ ~${dur} min</span>
+        <span class="badge badge-blue">📊 ${capitalize(selectedNivel)}</span>
+        <span class="badge badge-gray">💪 ${ejs.length} ejercicios</span>
+      </div>
+    </div>
+    ${ejs.map((ej,i)=>`
+      <div class="ejercicio-card" style="margin-bottom:10px">
+        <div class="ej-top"><div>
+          <div class="ej-num">Ejercicio ${i+1}</div>
+          <div class="ej-name">${ej.nombre}</div>
+          <div class="ej-grupo">${ej.grupoMuscular}</div>
+        </div></div>
+        ${ej.planB?`<div class="ej-nota" style="border-left-color:var(--accent2);color:var(--muted)">🔄 Plan B: ${ej.planB}</div>`:''}
+        <div class="ej-stats">
+          <div class="ej-stat"><div class="ej-stat-val">${ej.series}</div><div class="ej-stat-lbl">Series</div></div>
+          <div class="ej-stat"><div class="ej-stat-val">${ej.repeticiones}</div><div class="ej-stat-lbl">Reps</div></div>
+          <div class="ej-stat"><div class="ej-stat-val">${ej.pesoSugerido}</div><div class="ej-stat-lbl">Peso</div></div>
+          <div class="ej-stat"><div class="ej-stat-val">${ej.descansoSegundos}s</div><div class="ej-stat-lbl">Descanso</div></div>
+        </div>
+        ${ej.nota?`<div class="ej-nota">💡 ${ej.nota}</div>`:''}
+      </div>
+    `).join('')}
+    <div style="padding:0 16px;display:flex;gap:10px;margin-bottom:24px">
+      <button class="btn-primary" style="flex:1;justify-content:center" onclick='usarRutinaHoy(${JSON.stringify(nom)},${JSON.stringify(ejs)})'>✓ Usar hoy</button>
+      <button class="btn-secondary" onclick="generarRec()">↺ Otra</button>
+    </div>`;
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+function usarRutinaHoy(nom,ejs){
+  window._rutinaHoy = { nombre:nom, grupoPrincipal: selectedMuscles.join(' · '), duracionMinutos: 60, nivel: capitalize(selectedNivel), ejercicios: ejs.map(e=>({...e,completado:false})) };
+  saveRutinaLocal(window._rutinaHoy);
+  showToast('✅ '+nom+' guardada como rutina de hoy');
+  setTimeout(()=>goScreen('screen-rutina'),800);
+}
+</script>
+
+</body>
+</html>
