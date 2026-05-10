@@ -1,0 +1,582 @@
+/* css/planificador.css */
+/* DeFatFit v7 — Estilos del Planificador Semanal */
+
+/* ─────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────── */
+
+.plan-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 6rem;
+}
+
+/* ─────────────────────────────────────────────
+   HEADER
+───────────────────────────────────────────── */
+
+.plan-header {
+  padding: 1.25rem 1rem 0.75rem;
+}
+
+.plan-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.75rem;
+}
+
+.plan-semana-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plan-semana-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.plan-semana-texto {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.plan-semana-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.6rem;
+  border-radius: 20px;
+  background: rgba(110, 231, 183, 0.15);
+  color: #6ee7b7;
+}
+
+.plan-semana-badge.next {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+}
+
+.plan-nav-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: inherit;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.plan-nav-btn:active { background: rgba(255,255,255,0.12); }
+
+/* ─────────────────────────────────────────────
+   ACCIONES RÁPIDAS
+───────────────────────────────────────────── */
+
+.plan-acciones-rapidas {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.plan-acciones-rapidas::-webkit-scrollbar { display: none; }
+
+.plan-accion-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  padding: 0.45rem 0.9rem;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.plan-accion-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.97); }
+
+/* ─────────────────────────────────────────────
+   RESUMEN SEMANAL
+───────────────────────────────────────────── */
+
+.plan-resumen {
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+.plan-resumen-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.plan-resumen-chips::-webkit-scrollbar { display: none; }
+
+.plan-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  flex-shrink: 0;
+}
+
+.plan-chip.entreno   { background: rgba(110,231,183,0.1); border-color: rgba(110,231,183,0.2); }
+.plan-chip.descanso  { background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.15); }
+.plan-chip.completado{ background: rgba(110,231,183,0.15);border-color: rgba(110,231,183,0.3); }
+.plan-chip.vacio     { background: rgba(255,255,255,0.03);border-color: rgba(255,255,255,0.07); }
+
+.plan-chip-num   { font-size: 1.25rem; font-weight: 800; line-height: 1.1; }
+.plan-chip-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.1rem; }
+
+/* ─────────────────────────────────────────────
+   CARDS DE DÍAS
+───────────────────────────────────────────── */
+
+.plan-dias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0 1rem;
+}
+
+.plan-dia-card {
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.plan-dia-card.es-hoy {
+  border-color: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.05);
+}
+
+.plan-dia-card.es-pasado {
+  opacity: 0.65;
+}
+
+.plan-dia-card.completado {
+  border-color: rgba(110,231,183,0.35);
+  background: rgba(110,231,183,0.05);
+}
+
+.plan-dia-card.descanso {
+  border-color: rgba(148,163,184,0.2);
+  background: rgba(148,163,184,0.04);
+}
+
+.plan-dia-card.perdido {
+  border-color: rgba(248,113,113,0.2);
+  background: rgba(248,113,113,0.04);
+}
+
+/* Header de la card */
+.plan-dia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.plan-dia-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plan-dia-nombre {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.5;
+}
+
+.plan-dia-num {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.plan-hoy-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  background: #6ee7b7;
+  color: #0a0a0c;
+}
+
+/* Acciones del header */
+.plan-dia-acciones {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.plan-btn-icono {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.plan-btn-icono:active { background: rgba(255,255,255,0.15); }
+.plan-btn-clear { color: #f87171; border-color: rgba(248,113,113,0.2); }
+
+/* Contenido de la card */
+.plan-dia-contenido {
+  padding: 0 1rem 0.75rem;
+  cursor: pointer;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.plan-dia-vacio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255,255,255,0.25);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.plan-vacio-plus {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.2);
+}
+
+.plan-sin-registro { opacity: 0.2; font-size: 1.2rem; }
+
+.plan-dia-rutina {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.plan-rutina-nombre {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.plan-rutina-grupo {
+  font-size: 0.78rem;
+  opacity: 0.55;
+}
+
+.plan-rutina-dur {
+  font-size: 0.72rem;
+  opacity: 0.4;
+}
+
+.plan-dia-descanso {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  opacity: 0.6;
+}
+
+.plan-descanso-icon { font-size: 1.1rem; }
+
+/* Footer de la card */
+.plan-dia-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plan-estado-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
+
+.plan-estado-chip.completado { background: rgba(110,231,183,0.2); color: #6ee7b7; }
+.plan-estado-chip.perdido    { background: rgba(248,113,113,0.15); color: #f87171; }
+.plan-estado-chip.descanso   { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+.plan-btn-usar {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(110,231,183,0.3);
+  background: rgba(110,231,183,0.08);
+  color: #6ee7b7;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.plan-btn-usar:active { background: rgba(110,231,183,0.18); }
+
+.plan-btn-copiar {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.plan-btn-copiar:active { background: rgba(255,255,255,0.1); }
+
+/* ─────────────────────────────────────────────
+   PANEL SELECTOR DE RUTINA
+───────────────────────────────────────────── */
+
+.plan-selector-panel {
+  position: sticky;
+  bottom: 4.5rem;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: 0.75rem 0 0;
+  animation: slideUp 0.25s ease;
+}
+
+.plan-selector {
+  background: var(--color-surface, #1a1a1e);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 20px 20px 0 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+}
+
+.plan-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  position: sticky;
+  top: 0;
+  background: var(--color-surface, #1a1a1e);
+  z-index: 1;
+}
+
+.plan-selector-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.plan-selector-header button {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.5;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.plan-selector-seccion {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.plan-selector-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.4;
+  font-weight: 700;
+  padding: 0 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.plan-selector-buscador {
+  padding: 0 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.plan-input-buscar {
+  font-size: 0.88rem;
+  padding: 0.6rem 0.9rem;
+}
+
+.plan-selector-opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.plan-selector-opcion:active { background: rgba(255,255,255,0.05); }
+
+.descanso-opcion {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 0.85rem 1.25rem;
+}
+
+.reutilizar-opcion .plan-opc-icon {
+  color: #6ee7b7;
+  opacity: 1;
+}
+
+.plan-opc-icon {
+  font-size: 1.3rem;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+
+.plan-opc-nombre {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.plan-opc-sub {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin-top: 0.1rem;
+}
+
+.plan-opc-check { margin-left: auto; color: #6ee7b7; font-size: 1rem; }
+
+.plan-selector-vacio {
+  text-align: center;
+  padding: 1.5rem;
+  opacity: 0.4;
+  font-size: 0.85rem;
+}
+
+/* ─────────────────────────────────────────────
+   MODAL COPIAR A
+───────────────────────────────────────────── */
+
+.plan-copiar-dia-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.plan-copiar-dia-btn:last-child { border-bottom: none; }
+.plan-copiar-dia-btn:active { background: rgba(255,255,255,0.06); }
+
+.plan-copiar-dia-nombre {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 32px;
+}
+
+.plan-copiar-dia-fecha {
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.plan-copiar-overwrite {
+  font-size: 0.7rem;
+  color: #fbbf24;
+  margin-left: auto;
+}
+
+.plan-copiar-sub {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  flex: 1;
+}
+
+.plan-copiar-divider {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.35;
+  padding: 0.5rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 0.25rem;
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE TABLET/DESKTOP
+───────────────────────────────────────────── */
+
+@media (min-width: 640px) {
+  .plan-dias {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .plan-selector-panel {
+    position: fixed;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(480px, 92vw);
+    margin: 0;
+  }
+
+  .plan-selector {
+    border-radius: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .plan-dias {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
