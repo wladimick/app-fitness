@@ -24,7 +24,7 @@ const planificador = (() => {
     if (!container) return;
 
     _userId = window.currentUser?.id;
-    container.innerHTML = `<div class="loading-state"><div class="loader"></div></div>`;
+    container.innerHTML = UI.loading('Cargando planificación…');
 
     await _cargarDatos();
     _renderVista(container);
@@ -79,25 +79,19 @@ const planificador = (() => {
     const esSemanaActual = _semanaOffset === 0;
     const esSemanaFutura = _semanaOffset > 0;
 
-    container.innerHTML = `
-      <div class="plan-screen">
+    container.innerHTML =
+      UI.topbar({ title: 'Planificar' }) +
+      `<div class="screen-content">
 
-        <!-- HEADER -->
-        <div class="plan-header">
-          <div>
-            <h1>Planificar</h1>
-            <div class="plan-subtitulo">${etiqueta}</div>
+        <!-- NAVEGACIÓN DE SEMANA -->
+        <div class="plan-semana-nav">
+          <button class="plan-nav-btn" onclick="planificador.navegarSemana(-1)">‹</button>
+          <div class="plan-semana-label">
+            <span class="plan-semana-texto">${etiqueta}</span>
+            ${esSemanaActual ? '<span class="plan-semana-badge">Esta semana</span>' : ''}
+            ${_semanaOffset === 1 ? '<span class="plan-semana-badge next">Próxima semana</span>' : ''}
           </div>
-          <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-          <div class="plan-semana-nav">
-            <button class="plan-nav-btn" onclick="planificador.navegarSemana(-1)">‹</button>
-            <div class="plan-semana-label">
-              <span class="plan-semana-texto">${etiqueta}</span>
-              ${esSemanaActual ? '<span class="plan-semana-badge">Esta semana</span>' : ''}
-              ${_semanaOffset === 1 ? '<span class="plan-semana-badge next">Próxima semana</span>' : ''}
-            </div>
-            <button class="plan-nav-btn" onclick="planificador.navegarSemana(1)">›</button>
-          </div>
+          <button class="plan-nav-btn" onclick="planificador.navegarSemana(1)">›</button>
         </div>
 
         <!-- ACCESOS RÁPIDOS -->
@@ -125,8 +119,8 @@ const planificador = (() => {
           ${_renderSelectorRutina()}
         </div>
 
-      </div>
-    `;
+        <div style="height:16px"></div>
+      </div>`;
   }
 
   // ─────────────────────────────────────────────
@@ -593,7 +587,7 @@ const planificador = (() => {
   async function navegarSemana(delta) {
     _semanaOffset += delta;
     const container = document.getElementById('screen-planificador');
-    if (container) container.innerHTML = `<div class="loading-state"><div class="loader"></div></div>`;
+    if (container) container.innerHTML = UI.loading('Cargando semana…');
     await _cargarDatos();
     _renderVista(container);
   }
