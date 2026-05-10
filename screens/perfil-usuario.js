@@ -4,7 +4,7 @@ function initUsuario() {
   const p = window.currentProfile || {};
   const u = {
     nombre:     p.nombre     || '',
-    peso:       p.peso_actual || 0,
+    peso:       p.peso_actual ?? null,
     nivel:      p.nivel      || 'principiante',
     enfoque:    p.objetivo   || '',
     objetivo:   p.objetivo   || '',
@@ -23,7 +23,7 @@ function initUsuario() {
   if (av) av.textContent = getIniciales(u.nombre);
 
   const nm = document.getElementById('perfil-nombre');
-  if (nm) nm.textContent = u.nombre;
+  if (nm) nm.textContent = u.nombre || "Usuario";
 
   const nobj = document.getElementById('perfil-nivel-obj');
   if (nobj) nobj.textContent = edad
@@ -47,7 +47,7 @@ function initUsuario() {
   if (ep) ep.textContent = u.peso || '—';
 
   const ed = document.getElementById('perfil-dias');
-  if (ed) ed.textContent = u.frecuencia;
+  if (ed) ed.textContent = u.frecuencia || "—";
 
   const epr = document.getElementById('perfil-prioridad');
   if (epr) epr.textContent = u.prioridad || '—';

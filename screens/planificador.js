@@ -109,6 +109,8 @@ const planificador = (() => {
           ${_renderResumenStrip()}
         </div>
 
+        ${_rutinas.length===0 ? `<div class="card" style="margin-bottom:10px">Aún no hay rutinas disponibles para planificar. Crea una rutina desde Admin o Biblioteca.</div>` : ``}
+
         <!-- DÍAS DE LA SEMANA -->
         <div class="plan-dias">
           ${_planSemana.map((dia, i) => _renderDiaCard(dia, i, hoy)).join('')}
