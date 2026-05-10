@@ -9,10 +9,10 @@ const nutritionService = (() => {
    * Obtiene o crea el registro de alimentación del día.
    */
   async function obtenerRegistroDelDia(userId, fecha) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('alimentacion_registros')
       .select('*, alimentacion_porciones(*)')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .eq('fecha', fecha)
       .maybeSingle();
 
@@ -28,7 +28,7 @@ const nutritionService = (() => {
    * Obtiene los grupos de alimentación del catálogo.
    */
   async function obtenerGrupos() {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('alimentacion_grupos')
       .select('*')
       .eq('activo', true)
@@ -51,7 +51,7 @@ const nutritionService = (() => {
     const registro = await _upsertRegistro(userId, fecha);
     if (!registro) return { ok: false, error: 'No se pudo crear registro del día' };
 
-    const { error } = await window.supabase
+    const { error } = await window.db
       .from('alimentacion_porciones')
       .upsert({
         registro_id: registro.id,
@@ -79,7 +79,7 @@ const nutritionService = (() => {
     const registro = await _upsertRegistro(userId, fecha);
     if (!registro) return { ok: false, error: 'No se pudo crear registro del día' };
 
-    const { error } = await window.supabase
+    const { error } = await window.db
       .from('alimentacion_registros')
       .update({
         agua_vasos: vasos,
@@ -103,10 +103,10 @@ const nutritionService = (() => {
     const desde = new Date();
     desde.setDate(desde.getDate() - diasAtras);
 
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('alimentacion_registros')
       .select('fecha, completo, agua_vasos')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .gte('fecha', desde.toISOString().split('T')[0])
       .order('fecha', { ascending: false });
 
@@ -123,13 +123,13 @@ const nutritionService = (() => {
   // ─────────────────────────────────────────────
 
   async function _upsertRegistro(userId, fecha) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('alimentacion_registros')
       .upsert({
-        user_id: userId,
+        usuario_id: userId,
         fecha,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id,fecha' })
+      }, { onConflict: 'usuario_id,fecha' })
       .select()
       .maybeSingle();
 
@@ -144,12 +144,12 @@ const nutritionService = (() => {
   async function _verificarCompletitud(registroId, userId, fecha) {
     try {
       // Obtener porciones actuales
-      const { data: porciones } = await window.supabase
+      const { data: porciones } = await window.db
         .from('alimentacion_porciones')
         .select('cantidad, meta')
         .eq('registro_id', registroId);
 
-      const { data: registro } = await window.supabase
+      const { data: registro } = await window.db
         .from('alimentacion_registros')
         .select('agua_vasos')
         .eq('id', registroId)
@@ -164,7 +164,7 @@ const nutritionService = (() => {
       const aguaOk = (registro?.agua_vasos || 0) >= META_VASOS;
       const completo = todasCompletadas && aguaOk;
 
-      await window.supabase
+      await window.db
         .from('alimentacion_registros')
         .update({ completo, updated_at: new Date().toISOString() })
         .eq('id', registroId);
@@ -176,9 +176,9 @@ const nutritionService = (() => {
   function _gruposFallback() {
     return [
       { id: 'proteinas', label: 'Proteínas', meta: 10, unidad: 'porciones', orden: 1 },
-      { id: 'cerealesCarbohidratos', label: 'Cereales / carbohidratos', meta: 1.5, unidad: 'porciones', orden: 2 },
-      { id: 'verdurasLibreConsumo', label: 'Verduras libre consumo', meta: 2, unidad: 'porciones', orden: 3 },
-      { id: 'verdurasGeneral', label: 'Verduras en general', meta: 2, unidad: 'porciones', orden: 4 },
+      { id: 'cereales_carbohidratos', label: 'Cereales / carbohidratos', meta: 1.5, unidad: 'porciones', orden: 2 },
+      { id: 'verduras_libre_consumo', label: 'Verduras libre consumo', meta: 2, unidad: 'porciones', orden: 3 },
+      { id: 'verduras_general', label: 'Verduras en general', meta: 2, unidad: 'porciones', orden: 4 },
       { id: 'frutas', label: 'Frutas', meta: 1, unidad: 'porción', orden: 5 },
       { id: 'lacteos', label: 'Lácteos', meta: 1, unidad: 'porción', orden: 6 },
       { id: 'aceite', label: 'Aceite', meta: 1, unidad: 'porción', orden: 7 }

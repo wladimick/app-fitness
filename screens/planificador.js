@@ -46,10 +46,10 @@ const planificador = (() => {
     _rutinas = [...templates, ...propias];
 
     // Cargar planificación de la semana actual
-    const { data, error } = await window.supabase
-      .from('planificacion_dias')
+    const { data, error } = await window.db
+      .from('calendario')
       .select('*, rutinas(id, nombre, grupo_principal, duracion_minutos, nivel)')
-      .eq('user_id', _userId)
+      .eq('usuario_id', _userId)
       .gte('fecha', inicio)
       .lte('fecha', fin);
 
@@ -385,10 +385,10 @@ const planificador = (() => {
   }
 
   async function quitarDia(fecha) {
-    const { error } = await window.supabase
-      .from('planificacion_dias')
+    const { error } = await window.db
+      .from('calendario')
       .delete()
-      .eq('user_id', _userId)
+      .eq('usuario_id', _userId)
       .eq('fecha', fecha);
 
     if (!error) {
@@ -486,10 +486,10 @@ const planificador = (() => {
     const diasAnteriores = _getDiasSemana(-1);
 
     // Cargar planificación de la semana anterior
-    const { data } = await window.supabase
-      .from('planificacion_dias')
+    const { data } = await window.db
+      .from('calendario')
       .select('fecha, rutina_id, estado')
-      .eq('user_id', _userId)
+      .eq('usuario_id', _userId)
       .gte('fecha', diasAnteriores[0])
       .lte('fecha', diasAnteriores[6]);
 
@@ -528,10 +528,10 @@ const planificador = (() => {
     if (!confirmar) return;
 
     const dias = _getDiasSemana();
-    const { error } = await window.supabase
-      .from('planificacion_dias')
+    const { error } = await window.db
+      .from('calendario')
       .delete()
-      .eq('user_id', _userId)
+      .eq('usuario_id', _userId)
       .in('fecha', dias)
       .in('estado', ['pendiente', 'descanso', 'reprogramado']);
 
@@ -572,15 +572,15 @@ const planificador = (() => {
   // ─────────────────────────────────────────────
 
   async function _guardarDia(fecha, rutinaId, estado) {
-    const { error } = await window.supabase
-      .from('planificacion_dias')
+    const { error } = await window.db
+      .from('calendario')
       .upsert({
-        user_id:   _userId,
+        usuario_id:   _userId,
         fecha,
         rutina_id: rutinaId || null,
         estado:    estado || 'pendiente',
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id,fecha' });
+      }, { onConflict: 'usuario_id,fecha' });
 
     if (error) {
       console.error('[planificador] Error guardando día:', error.message);

@@ -146,7 +146,7 @@ serve(async (req: Request) => {
       const { data: sub, error: subError } = await supabaseAdmin
         .from("suscripciones")
         .upsert({
-          user_id: userId,
+          usuario_id: userId,
           plan_id: planId,
           estado: "activa",
           fecha_inicio: hoy.toISOString().split("T")[0],
@@ -155,7 +155,7 @@ serve(async (req: Request) => {
           provider_payment_id: String(paymentId),
           metadata: { mp_status: estadoMP, mp_payment_id: paymentId },
           updated_at: new Date().toISOString()
-        }, { onConflict: "user_id" })
+        }, { onConflict: "usuario_id" })
         .select()
         .maybeSingle();
 
@@ -169,7 +169,7 @@ serve(async (req: Request) => {
     // 6. Registrar el pago en la tabla `pagos`
     // ─────────────────────────────────────────
     await supabaseAdmin.from("pagos").upsert({
-      user_id: userId,
+      usuario_id: userId,
       suscripcion_id: suscripcionId,
       provider: "mercadopago",
       provider_payment_id: String(paymentId),

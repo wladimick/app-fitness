@@ -14,10 +14,10 @@ const paymentService = (() => {
    */
   async function crearPreferenciaMercadoPago(planId) {
     try {
-      const { data: { session } } = await window.supabase.auth.getSession();
+      const { data: { session } } = await window.db.auth.getSession();
       if (!session) throw new Error('Sin sesión activa');
 
-      const { data, error } = await window.supabase.functions.invoke('crear-preferencia-mp', {
+      const { data, error } = await window.db.functions.invoke('crear-preferencia-mp', {
         body: { planId }
       });
 
@@ -36,7 +36,7 @@ const paymentService = (() => {
    */
   async function crearSuscripcionPayPal(planId) {
     try {
-      const { data, error } = await window.supabase.functions.invoke('crear-suscripcion-paypal', {
+      const { data, error } = await window.db.functions.invoke('crear-suscripcion-paypal', {
         body: { planId }
       });
 
@@ -54,7 +54,7 @@ const paymentService = (() => {
    */
   async function verificarEstadoPago(paymentId, provider) {
     try {
-      const { data, error } = await window.supabase.functions.invoke('verificar-pago', {
+      const { data, error } = await window.db.functions.invoke('verificar-pago', {
         body: { paymentId, provider }
       });
 
@@ -84,10 +84,10 @@ const paymentService = (() => {
     termino.setDate(termino.getDate() + dias);
 
     // Primero crea el registro de suscripción
-    const { data: sub, error: subError } = await window.supabase
+    const { data: sub, error: subError } = await window.db
       .from('suscripciones')
       .insert({
-        user_id: userId,
+        usuario_id: userId,
         plan_id: planId,
         estado: 'activa',
         fecha_inicio: hoy.toISOString().split('T')[0],
@@ -102,8 +102,8 @@ const paymentService = (() => {
     }
 
     // Luego registra el pago
-    await window.supabase.from('pagos').insert({
-      user_id: userId,
+    await window.db.from('pagos').insert({
+      usuario_id: userId,
       suscripcion_id: sub.id,
       provider: 'manual',
       estado: 'aprobado',
@@ -118,10 +118,10 @@ const paymentService = (() => {
    * Obtiene el historial de pagos del usuario.
    */
   async function obtenerHistorialPagos(userId) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('pagos')
       .select('*')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {

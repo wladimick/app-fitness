@@ -32,6 +32,17 @@
 <script src="js/router.js"    defer></script>
 <script src="js/auth.js"      defer></script>
 
+<!-- Servicios -->
+<script src="js/services/profileService.js"      defer></script>
+<script src="js/services/subscriptionService.js" defer></script>
+<script src="js/services/paymentService.js"      defer></script>
+<script src="js/services/exerciseService.js"     defer></script>
+<script src="js/services/nutritionService.js"    defer></script>
+<script src="js/services/supplementService.js"   defer></script>
+<script src="js/services/bodyProService.js"      defer></script>
+<script src="js/services/emailService.js"        defer></script>
+
+
 
 <!-- Screens -->
 <script src="screens/onboarding.js"    defer></script>
@@ -44,6 +55,7 @@
 <script src="screens/perfil-usuario.js"defer></script>
 <script src="screens/admin.js"         defer></script>
 <script src="screens/planificador.js" defer></script>
+<script src="screens/suscripcion.js" defer></script>
 </head>
 <body class="auth-mode">
 
@@ -678,7 +690,7 @@
 <nav id="bottom-nav" style="display:none">
 
   <div class="nav-item active" data-screen="screen-inicio" onclick="goScreen('screen-inicio')"><span class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/></svg></span><span>Inicio</span></div>
-  <button class="nav-item" data-screen="planificador" onclick="navegarA('planificador')">
+  <button class="nav-item" data-screen="screen-planificador" onclick="goScreen('screen-planificador')">
   <div class="nav-icon">📅</div>
   <span>Planificar</span>
 </button>

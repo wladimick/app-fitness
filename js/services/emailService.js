@@ -10,7 +10,7 @@ const emailService = (() => {
    */
   async function _enviar(tipo, destinatario, datos = {}) {
     try {
-      const { error } = await window.supabase.functions.invoke('enviar-email', {
+      const { error } = await window.db.functions.invoke('enviar-email', {
         body: { tipo, destinatario, datos }
       });
 

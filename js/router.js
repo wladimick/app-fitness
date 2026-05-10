@@ -25,6 +25,8 @@ function goScreen(id) {
     'screen-perfil':    () => window.initPerfil?.(),
     'screen-usuario':   () => window.initUsuario?.(),
     'screen-admin':     () => window.initAdmin?.(),
+    'screen-planificador':() => window.initPlanificador?.(),
+    'screen-suscripcion':() => window.initSuscripcion?.(),
     'screen-recomendar':() => {},
   };
   inits[id]?.();
