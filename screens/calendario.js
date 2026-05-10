@@ -56,6 +56,7 @@ async function _cargarYRenderCalendario(userId) {
 
     <div id="cal-detalle-dia" class="cal-detalle" style="display:none"></div>
 
+    ${_calendarioDatos.length===0 ? `<div class="card" style="margin-top:10px">Aún no hay planificación para este mes. Usa Planificar para asignar rutinas.</div>`:''}
     <div class="cal-semana-resumen">
       <h3>Esta semana</h3>
       ${_renderResumenSemana(hoy)}
