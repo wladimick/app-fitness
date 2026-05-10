@@ -33,8 +33,9 @@
   font-family: var(--font-d);
   font-size: 28px;
   letter-spacing: 2px;
-  color: var(--accent);
+  color: var(--text);
 }
+.topbar-logo--brand { color: var(--accent); }
 .topbar-right { display: flex; gap: 10px; align-items: center; }
 
 /* ── Nav inferior ── */

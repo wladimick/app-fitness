@@ -18,16 +18,20 @@ function goScreen(id) {
 
   // Inicializar la screen al entrar
   const inits = {
-    'screen-inicio':    () => window.initDashboard?.(),
-    'screen-rutina':    () => window.initRutina?.(),
+    'screen-inicio':       () => window.initDashboard?.(),
+    'screen-rutina':       () => window.initRutina?.(),
     'screen-alimentacion': () => window.initAlimentacion?.(),
-    'screen-calendario':() => window.initCalendario?.(),
-    'screen-perfil':    () => window.initPerfil?.(),
-    'screen-usuario':   () => window.initUsuario?.(),
-    'screen-admin':     () => window.initAdmin?.(),
-    'screen-planificador':() => (window.initPlanificador || window.renderPlanificador)?.(),
-    'screen-suscripcion':() => window.initSuscripcion?.(),
-    'screen-recomendar':() => {},
+    'screen-calendario':   () => window.initCalendario?.(),
+    'screen-perfil':       () => window.initPerfil?.(),
+    'screen-usuario':      () => window.initUsuario?.(),
+    'screen-admin':        () => window.initAdmin?.(),
+    'screen-planificador': () => (window.initPlanificador || window.renderPlanificador)?.(),
+    'screen-suscripcion':  () => (window.renderSuscripcion || window.initSuscripcion)?.(),
+    'screen-suplementos':  () => window.renderSuplementos?.(),
+    'screen-ejercicios':   () => window.initEjercicios?.(),
+    'screen-pagos':        () => window.initPagos?.(),
+    'screen-configuracion':() => window.initConfiguracion?.(),
+    'screen-recomendar':   () => {},
   };
   inits[id]?.();
 }
