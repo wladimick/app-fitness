@@ -6,7 +6,6 @@ let _dragSrcIdx = null;
 let _planActivo = {}; // { ejId: 'A' | 'B' }
 
 function _getRutina() {
-  if (!window._rutinaHoy) window._rutinaHoy = cargarRutinaLocal();
   return window._rutinaHoy;
 }
 
@@ -18,6 +17,15 @@ function _saveRutina() {
 /* ── Inicializar pantalla ── */
 function initRutina() {
   const r = _getRutina();
+  if (!r) {
+    const titulo = document.getElementById('rutina-titulo');
+    const meta = document.getElementById('rutina-meta');
+    const list = document.getElementById('ejercicios-list');
+    if (titulo) titulo.textContent = 'No tienes rutina asignada para hoy';
+    if (meta) meta.innerHTML = `<span class="badge badge-gray">Planifica tu entrenamiento</span>`;
+    if (list) list.innerHTML = `<div class="card" style="padding:16px;text-align:center"><p>No tienes rutina asignada para hoy</p><button class="btn-primary" onclick="goScreen('screen-planificador')">Planificar rutina</button><button class="btn-secondary" style="margin-left:8px" onclick="goScreen('screen-ejercicios')">Elegir sesión recomendada</button></div>`;
+    return;
+  }
 
   // Header
   const tag = document.getElementById('rutina-dia-tag');
