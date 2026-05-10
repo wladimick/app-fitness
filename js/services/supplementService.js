@@ -7,7 +7,7 @@ const supplementService = (() => {
    * Obtiene el catálogo de suplementos activos.
    */
   async function obtenerSuplementos() {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('suplementos')
       .select('*')
       .eq('activo', true)
@@ -25,10 +25,10 @@ const supplementService = (() => {
    * Obtiene los suplementos activos del usuario con su configuración personal.
    */
   async function obtenerSuplementosUsuario(userId) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('usuario_suplementos')
       .select('*, suplementos(*)')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .eq('activo', true);
 
     if (error) {
@@ -43,17 +43,17 @@ const supplementService = (() => {
    * Activa o desactiva un suplemento para el usuario.
    */
   async function toggleSuplemento(userId, suplementoId, activo, config = {}) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('usuario_suplementos')
       .upsert({
-        user_id: userId,
+        usuario_id: userId,
         suplemento_id: suplementoId,
         activo,
         dosis_personalizada: config.dosis || null,
         horario: config.horario || null,
         notas: config.notas || null,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id,suplemento_id' })
+      }, { onConflict: 'usuario_id,suplemento_id' })
       .select()
       .maybeSingle();
 
@@ -69,7 +69,7 @@ const supplementService = (() => {
    * Admin: actualiza un suplemento del catálogo.
    */
   async function actualizarSuplementoAdmin(id, campos) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('suplementos')
       .update({ ...campos, updated_at: new Date().toISOString() })
       .eq('id', id)

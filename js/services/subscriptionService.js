@@ -9,10 +9,10 @@ const subscriptionService = (() => {
    * Usa la vista v_suscripcion_actual.
    */
   async function obtenerSuscripcionActual(userId) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('v_suscripcion_actual')
       .select('*')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .maybeSingle();
 
     if (error) {
@@ -25,10 +25,10 @@ const subscriptionService = (() => {
   }
 
   async function _obtenerDesdeTablaSuscripciones(userId) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('suscripciones')
       .select('*, planes_suscripcion(nombre)')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .in('estado', ['trial', 'activa', 'pendiente'])
       .order('fecha_termino', { ascending: false })
       .limit(1)
@@ -65,10 +65,10 @@ const subscriptionService = (() => {
     const termino = new Date(hoy);
     termino.setDate(termino.getDate() + 15);
 
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('suscripciones')
       .insert({
-        user_id: userId,
+        usuario_id: userId,
         plan_id: 'prueba_15',
         estado: 'trial',
         fecha_inicio: hoy.toISOString().split('T')[0],
@@ -95,7 +95,7 @@ const subscriptionService = (() => {
    * Obtiene todos los planes disponibles.
    */
   async function obtenerPlanes() {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('planes_suscripcion')
       .select('*')
       .eq('activo', true)
@@ -113,7 +113,7 @@ const subscriptionService = (() => {
    * Admin: obtiene suscripciones de todos los usuarios.
    */
   async function obtenerTodasLasSuscripciones() {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('suscripciones')
       .select('*, perfiles(nombre, email), planes_suscripcion(nombre)')
       .order('created_at', { ascending: false });

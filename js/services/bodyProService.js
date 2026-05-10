@@ -7,10 +7,10 @@ const bodyProService = (() => {
    * Obtiene las últimas 2 mediciones del usuario (actual y anterior).
    */
   async function obtenerUltimasMediciones(userId, limite = 2) {
-    const { data, error } = await window.supabase
-      .from('metricas_body_pro')
+    const { data, error } = await window.db
+      .from('mediciones')
       .select('*')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .order('fecha', { ascending: false })
       .limit(limite);
 
@@ -29,10 +29,10 @@ const bodyProService = (() => {
     const desde = new Date();
     desde.setMonth(desde.getMonth() - meses);
 
-    const { data, error } = await window.supabase
-      .from('metricas_body_pro')
+    const { data, error } = await window.db
+      .from('mediciones')
       .select('fecha, peso, grasa_corporal, masa_muscular, imc')
-      .eq('user_id', userId)
+      .eq('usuario_id', userId)
       .gte('fecha', desde.toISOString().split('T')[0])
       .order('fecha', { ascending: true });
 
@@ -48,10 +48,10 @@ const bodyProService = (() => {
    * Registra una nueva medición Body Pro.
    */
   async function registrarMedicion(userId, medicion) {
-    const { data, error } = await window.supabase
-      .from('metricas_body_pro')
+    const { data, error } = await window.db
+      .from('mediciones')
       .insert({
-        user_id: userId,
+        usuario_id: userId,
         fecha: medicion.fecha || new Date().toISOString().split('T')[0],
         peso: medicion.peso || null,
         grasa_corporal: medicion.grasaCorporal || null,
@@ -72,7 +72,7 @@ const bodyProService = (() => {
 
     // Actualizar peso en perfil si viene en la medición
     if (medicion.peso) {
-      await window.supabase
+      await window.db
         .from('perfiles')
         .update({ peso_actual: medicion.peso, updated_at: new Date().toISOString() })
         .eq('id', userId);
@@ -109,8 +109,8 @@ const bodyProService = (() => {
    * Admin: obtiene todas las métricas de todos los usuarios.
    */
   async function obtenerTodasLasMetricas() {
-    const { data, error } = await window.supabase
-      .from('metricas_body_pro')
+    const { data, error } = await window.db
+      .from('mediciones')
       .select('*, perfiles(nombre, email)')
       .order('created_at', { ascending: false })
       .limit(100);

@@ -12,7 +12,7 @@ const profileService = (() => {
   async function obtenerPerfil(userId) {
     if (_perfil && _perfil.id === userId) return _perfil;
 
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('perfiles')
       .select('*')
       .eq('id', userId)
@@ -36,10 +36,10 @@ const profileService = (() => {
    * Crea el perfil del usuario si no existe (fallback del trigger).
    */
   async function crearPerfil(userId) {
-    const { data: { user } } = await window.supabase.auth.getUser();
+    const { data: { user } } = await window.db.auth.getUser();
     if (!user) return null;
 
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('perfiles')
       .insert({
         id: userId,
@@ -66,7 +66,7 @@ const profileService = (() => {
    * Actualiza campos del perfil del usuario.
    */
   async function actualizarPerfil(userId, campos) {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('perfiles')
       .update({ ...campos, updated_at: new Date().toISOString() })
       .eq('id', userId)
@@ -86,7 +86,7 @@ const profileService = (() => {
    * Obtiene todos los perfiles (solo admin).
    */
   async function obtenerTodosLosPerfiles() {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.db
       .from('perfiles')
       .select('id, email, nombre, rol, estado, nivel, peso_actual, frecuencia_semanal, racha, created_at')
       .order('created_at', { ascending: false });
