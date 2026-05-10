@@ -34,6 +34,7 @@ async function renderSuplementos() {
     ` : ''}
 
     <div class="sec-label">Catálogo</div>
+    ${catalogo.length===0 ? UI.empty({icon:'💊',title:'Aún no hay suplementos activos',body:'El admin puede publicar suplementos desde el panel.'}) : ''}
     <div class="supl-list">
       ${catalogo.map(s => _renderSuplCard(s, activosIds.has(s.id), misSupl)).join('')}
     </div>
@@ -55,7 +56,7 @@ function _renderSuplCard(supl, activo, misSupl) {
       <div class="supl-icon">💊</div>
       <div class="supl-info">
         <div class="supl-nombre">${supl.nombre}</div>
-        <div class="supl-dosis">${supl.dosis_general || supl.descripcion || ''}</div>
+        <div class="supl-dosis">${supl.categoria || 'General'} · ${supl.dosis_general || ''}</div><div style='font-size:12px;color:var(--muted)'>${supl.descripcion||'Sin descripción'}</div><div style='font-size:12px;color:var(--muted)'>${supl.como_tomar||''}</div><div style='font-size:12px;color:#ffbdbd'>${supl.advertencias||''}</div>
       </div>
       <div class="supl-actions">
         <label class="toggle-switch">

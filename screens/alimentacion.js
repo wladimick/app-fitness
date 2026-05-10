@@ -75,7 +75,7 @@ async function renderAlimentacion() {
     </div>
 
     <div class="alim-nota">
-      <p>Pauta nutricional de Alejandra Zerega — ${_fechaPauta()}</p>
+      <p>Sin pauta personalizada registrada</p>
     </div>
   `;
 }

@@ -21,9 +21,9 @@ function initRutina() {
     const titulo = document.getElementById('rutina-titulo');
     const meta = document.getElementById('rutina-meta');
     const list = document.getElementById('ejercicios-list');
-    if (titulo) titulo.textContent = 'No tienes rutina asignada para hoy';
+    if (titulo) titulo.textContent = 'Aún no tienes una rutina asignada.';
     if (meta) meta.innerHTML = `<span class="badge badge-gray">Planifica tu entrenamiento</span>`;
-    if (list) list.innerHTML = `<div class="card" style="padding:16px;text-align:center"><p>No tienes rutina asignada para hoy</p><button class="btn-primary" onclick="goScreen('screen-planificador')">Planificar rutina</button><button class="btn-secondary" style="margin-left:8px" onclick="goScreen('screen-ejercicios')">Elegir sesión recomendada</button></div>`;
+    if (list) list.innerHTML = `<div class="card" style="padding:16px;text-align:center"><p>Aún no tienes una rutina asignada.</p><button class="btn-primary" onclick="goScreen('screen-planificador')">Planificar rutina</button><button class="btn-secondary" style="margin-left:8px" onclick="goScreen('screen-ejercicios')">Elegir sesión recomendada</button></div>`;
     return;
   }
 
@@ -217,27 +217,28 @@ function guardarEjercicio() {
 }
 
 /* ── Agregar ejercicio ── */
-function abrirAgregarEjercicio() {
+async function abrirAgregarEjercicio() {
   const lista = document.getElementById('add-ej-lista');
-  const todos = Object.values(ejerciciosDB).flat();
+  const todos = await exerciseService.obtenerEjercicios({ forzar: true });
+  if (!todos.length) { lista.innerHTML = '<div class="card">No hay ejercicios disponibles en el catálogo.</div>'; openOverlay('modal-add-ej'); return; }
   lista.innerHTML = todos.map(e => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-size:14px;font-weight:600">${e.nombre}</div>
-        <div style="font-size:12px;color:var(--muted)">${e.grupoMuscular} · ${e.series}×${e.repeticiones}</div>
+        <div style="font-size:12px;color:var(--muted)">${e.grupo_muscular || 'General'} · ${e.nivel || '—'}</div>
         ${e.planB ? `<div style="font-size:11px;color:var(--accent2);margin-top:2px">Plan B: ${e.planB}</div>` : ''}
       </div>
-      <button class="btn-secondary" style="padding:7px 14px;font-size:12px;flex-shrink:0" onclick="agregarDesdeLista(${e.id})">＋</button>
+      <button class="btn-secondary" style="padding:7px 14px;font-size:12px;flex-shrink:0" onclick="agregarDesdeLista('${e.id}')">＋</button>
     </div>
   `).join('');
   document.getElementById('new-ej-nombre').value = '';
   openOverlay('modal-add-ej');
 }
 
-function agregarDesdeLista(ejId) {
-  const ej = Object.values(ejerciciosDB).flat().find(e => e.id === ejId);
+async function agregarDesdeLista(ejId) {
+  const ej = await exerciseService.obtenerEjercicioPorId(ejId);
   if (!ej) return;
-  _getRutina().ejercicios.push({ ...ej, completado: false });
+  _getRutina().ejercicios.push({ id: ej.id, nombre: ej.nombre, grupoMuscular: ej.grupo_muscular || 'General', series: 3, repeticiones: '10-12', pesoSugerido: 'Libre', descansoSegundos: 60, nota: ej.nota || null, planB: null, completado: false });
   _saveRutina();
   closeOverlay('modal-add-ej');
   renderEjs();
@@ -281,14 +282,7 @@ function completarRutina() {
   showToast('✅ Rutina completada y guardada');
 }
 
-function cargarYVerRutina(clave) {
-  const r = rutinasBase[clave];
-  if (!r) return;
-  window._rutinaHoy = { ...r, ejercicios: r.ejercicios.map(e => ({ ...e, completado: false })) };
-  _saveRutina();
-  showToast('📋 ' + r.nombre + ' cargada');
-  setTimeout(() => goScreen('screen-rutina'), 600);
-}
+function cargarYVerRutina() { showToast('Esta acción ahora depende de rutinas en Supabase.'); }
 
 /* ── Timer ── */
 let _timerInterval = null, _timerTotal = 0, _timerLeft = 0;

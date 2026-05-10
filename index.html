@@ -42,6 +42,7 @@
 <script src="js/services/supplementService.js"   defer></script>
 <script src="js/services/bodyProService.js"      defer></script>
 <script src="js/services/emailService.js"        defer></script>
+<script src="js/services/contentService.js"      defer></script>
 
 <!-- UI helpers (antes que los screens) -->
 <script src="js/ui.js" defer></script>
@@ -662,7 +663,7 @@
   <div class="sec-label">Distribución semanal</div>
   <div class="card" style="padding:12px 16px">
     <div style="display:flex;flex-direction:column;gap:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Lunes</span><span style="font-size:14px;font-weight:700;color:var(--accent);cursor:pointer" onclick="cargarYVerRutina('torsoA')">Torso A — Fuerza Estética</span></div>
+      <div style="font-size:13px;color:var(--muted);padding:9px 0">Aún no tienes distribución semanal definida.</div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Martes</span><span style="font-size:14px;font-weight:700;color:var(--accent2);cursor:pointer" onclick="cargarYVerRutina('piernas')">Piernas — Sentadilla</span></div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Miércoles</span><span style="font-size:14px;color:var(--muted)">Descanso</span></div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted);width:90px">Jueves</span><span style="font-size:14px;font-weight:700;color:var(--accent);cursor:pointer" onclick="cargarYVerRutina('torsoB')">Torso B — Tirón</span></div>
@@ -871,216 +872,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Screens extras que aún no tienen archivo (usan inline mínimo) -->
+<!-- Screens extras legacy neutralizados -->
 <script>
-// Calendario (versión simplificada para Sprint 1)
-function calMode(modo) {
-  document.getElementById('btn-semana').classList.toggle('active', modo==='semana');
-  document.getElementById('btn-mes').classList.toggle('active', modo==='mes');
-  document.getElementById('cal-semana').style.display = modo==='semana' ? '' : 'none';
-  document.getElementById('cal-mes').style.display    = modo==='mes'    ? '' : 'none';
+function initCalendario(){ if (typeof renderCalendario === 'function') return renderCalendario(); }
+function initPerfil(){
+  if (typeof renderPerfilFisico === 'function') return renderPerfilFisico();
+  const c=document.getElementById('screen-perfil');
+  if(c) c.innerHTML='<div class="screen-content"><div class="card">Aún no tienes mediciones registradas.</div></div>';
 }
-
-function initCalendario() {
-  // Delegar a la versión v7 (Supabase) si está disponible; si no, usar el fallback Sprint 1.
-  if (typeof renderCalendario === 'function') { renderCalendario(); return; }
-  buildWeek(); buildMonth();
-}
-
-function buildWeek() {
-  const hoy = new Date();
-  const diaDeLaSemana = (hoy.getDay() + 6) % 7; // 0=lunes
-  const grid  = document.getElementById('week-grid');
-  const ruts  = document.getElementById('week-rutinas');
-  if (!grid || !ruts) return;
-  grid.innerHTML = ''; ruts.innerHTML = '';
-  const diasLabel = ['L','M','X','J','V','S','D'];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(hoy);
-    d.setDate(hoy.getDate() - diaDeLaSemana + i);
-    const fecha = d.toISOString().split('T')[0];
-    const cal   = calendarioDias.find(c => c.fecha === fecha);
-    const foodReg = window.alimentacionObtenerRegistro?.(fecha);
-    const foodDone = foodReg ? window.alimentacionCalcularProgreso?.(foodReg)?.diaCompleto : false;
-    const esHoy = i === diaDeLaSemana;
-    const wd = document.createElement('div');
-    wd.className = 'week-day';
-    wd.innerHTML = `
-      <div class="week-day-label">${diasLabel[i]}</div>
-      <div class="week-day-num ${cal ? cal.estado : 'sin-rutina'}${esHoy ? ' hoy' : ''}"
-        onclick="${cal ? `abrirDia('${fecha}','${cal.resumen}','${cal.estado}')` : ''}">
-        ${d.getDate()}${foodDone ? '<span class="food-day-indicator" title="Alimentación completa"></span>' : ''}
-      </div>
-    `;
-    grid.appendChild(wd);
-  }
-  calendarioDias.slice(-5).forEach(d => {
-    const bc = {completado:'badge-green',pendiente:'badge-blue',descanso:'badge-gray',perdido:'badge-red'}[d.estado]||'badge-gray';
-    const lb = {completado:'Completado',pendiente:'Pendiente',descanso:'Descanso',perdido:'Perdido'}[d.estado]||d.estado;
-    const c  = document.createElement('div');
-    c.className = 'card card-clickable';
-    c.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${formatFecha(d.fecha)}</div>
-          <div style="font-size:16px;font-weight:700">${d.resumen}</div>
-        </div>
-        <span class="badge ${bc}">${lb}</span>
-      </div>`;
-    c.onclick = () => abrirDia(d.fecha, d.resumen, d.estado);
-    ruts.appendChild(c);
-  });
-}
-
-function buildMonth() {
-  const cells = document.getElementById('month-cells');
-  if (!cells) return;
-  cells.innerHTML = '';
-  const hoy  = new Date();
-  const year = hoy.getFullYear();
-  const mes  = hoy.getMonth();
-  const primerDia = new Date(year, mes, 1).getDay();
-  const inicio    = (primerDia + 6) % 7;
-  const diasEnMes = new Date(year, mes + 1, 0).getDate();
-
-  // Actualizar label
-  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const lbl = document.getElementById('cal-mes-label');
-  if (lbl) lbl.textContent = `${meses[mes]} ${year}`;
-
-  for (let i = 0; i < inicio; i++) {
-    const e = document.createElement('div'); e.className = 'month-cell empty'; cells.appendChild(e);
-  }
-  for (let d = 1; d <= diasEnMes; d++) {
-    const fecha = `${year}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const cal   = calendarioDias.find(c => c.fecha === fecha);
-    const foodReg = window.alimentacionObtenerRegistro?.(fecha);
-    const foodDone = foodReg ? window.alimentacionCalcularProgreso?.(foodReg)?.diaCompleto : false;
-    const esHoy = d === hoy.getDate();
-    const e     = document.createElement('div');
-    e.className = `month-cell ${cal ? cal.estado : 'sin-rutina'}${esHoy ? ' hoy' : ''}${foodDone ? ' food-ok' : ''}`;
-    e.innerHTML = `${d}${foodDone ? '<span class="food-day-indicator" title="Alimentación completa"></span>' : ''}`;
-    if (cal) e.onclick = () => abrirDia(fecha, cal.resumen, cal.estado);
-    cells.appendChild(e);
-  }
-}
-
-function abrirDia(fecha, rutina, estado) {
-  document.getElementById('modal-fecha').textContent = formatFecha(fecha);
-  document.getElementById('modal-rutina-nombre').textContent = rutina;
-  const bc = {completado:'badge-green',pendiente:'badge-blue',descanso:'badge-gray',perdido:'badge-red'}[estado]||'badge-gray';
-  const lb = {completado:'Completado',pendiente:'Pendiente',descanso:'Descanso',perdido:'Perdido'}[estado]||estado;
-  document.getElementById('modal-badges').innerHTML = `<span class="badge ${bc}">${lb}</span>`;
-  const mDiv = document.getElementById('modal-ejercicios');
-  if (estado === 'descanso') {
-    mDiv.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:10px 0">Día de descanso. Sin ejercicios programados.</div>';
-  } else {
-    const r = window._rutinaHoy || defaultRutina();
-    mDiv.innerHTML = r.ejercicios.slice(0, 3).map(e => `
-      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="font-weight:700;font-size:14px">${e.nombre}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">${e.series} series · ${e.repeticiones} reps · ${e.pesoSugerido}</div>
-      </div>`).join('') + '<div style="font-size:12px;color:var(--muted);padding-top:8px">+ más en la rutina completa</div>';
-  }
-  openOverlay('modal-cal');
-}
-
-// Body Pro (versión Sprint 1)
-function initPerfil() {
-  const a = medidasCorporales[0], p = medidasCorporales[1];
-  document.getElementById('bp-fecha').textContent = 'Última medición: ' + a.fecha;
-  document.getElementById('bp-peso').innerHTML = `${a.peso}<span>kg</span>`;
-  const d = (a.peso - p.peso).toFixed(1), neg = d < 0;
-  const bp = document.getElementById('bp-delta');
-  bp.className = 'bodypro-delta ' + (neg ? 'delta-neg' : 'delta-pos');
-  bp.textContent = (neg ? '▼ ' : '▲ ') + Math.abs(d) + ' kg desde anterior';
-  const metricas = [
-    { label:'Grasa corporal', val:a.grasaCorporal, prev:p.grasaCorporal, unit:'%',   bajoEsMejor:true },
-    { label:'Masa muscular',  val:a.masaMuscular,  prev:p.masaMuscular,  unit:'kg',  bajoEsMejor:false },
-    { label:'Agua corporal',  val:a.aguaCorporal,  prev:p.aguaCorporal,  unit:'%',   bajoEsMejor:false },
-    { label:'Grasa visceral', val:a.grasaVisceral, prev:p.grasaVisceral, unit:'',    bajoEsMejor:true },
-    { label:'IMC',            val:a.imc,           prev:p.imc,           unit:'',    bajoEsMejor:true },
-    { label:'Metabolismo',    val:a.metabolismoBasal,prev:p.metabolismoBasal,unit:'kcal',bajoEsMejor:false },
-    { label:'Edad corporal',  val:a.edadCorporal,  prev:p.edadCorporal,  unit:'años',bajoEsMejor:true },
-  ];
-  const grid = document.getElementById('metrics-grid');
-  grid.innerHTML = '';
-  metricas.forEach(m => {
-    const d2=(m.val-m.prev).toFixed(1),mejor=m.bajoEsMejor?d2<0:d2>0,igual=d2==0;
-    const cc=igual?'comp-igual':mejor?'comp-mejor':'comp-peor';
-    const ct=igual?'= Sin cambio':(mejor?'▼ ':'▲ ')+Math.abs(d2)+' '+m.unit;
-    const card=document.createElement('div'); card.className='metric-card';
-    card.innerHTML=`<div class="metric-label">${m.label}</div><div class="metric-value">${m.val}<span> ${m.unit}</span></div><div class="metric-comp ${cc}">${ct}</div>`;
-    grid.appendChild(card);
-  });
-  const bars = document.getElementById('chart-bars');
-  bars.innerHTML = '';
-  [{label:'Masa muscular',val:a.masaMuscular,max:60,color:'var(--accent)'},{label:'Grasa corporal',val:a.grasaCorporal,max:40,color:'var(--orange)'},{label:'Agua corporal',val:a.aguaCorporal,max:80,color:'var(--accent2)'}].forEach(b=>{
-    bars.innerHTML+=`<div><div class="chart-bar-label"><span>${b.label}</span><span>${b.val}${b.label.includes('Agua')||b.label.includes('Grasa')?'%':' kg'}</span></div><div class="prog-wrap"><div class="prog-bar" style="width:${Math.round(b.val/b.max*100)}%;background:${b.color}"></div></div></div>`;
-  });
-  document.getElementById('hist-list').innerHTML = medidasCorporales.map(m=>
-    `<div class="hist-item"><div class="hist-date">${m.fecha}</div><div class="hist-vals">${m.peso}kg · ${m.grasaCorporal}% G · ${m.masaMuscular}kg M</div></div>`
-  ).join('');
-}
-// Delegar a la versión v7 (Supabase) si está disponible; si no, usar el fallback Sprint 1.
-window.initPerfil = () => {
-  if (typeof renderPerfilFisico === 'function') { renderPerfilFisico(); return; }
-  initPerfil();
-};
-
-// Recomendaciones (versión Sprint 1)
+window.initPerfil = initPerfil;
 let selectedMuscles=[], selectedNivel='principiante';
-function setNivel(n,el){ selectedNivel=n; document.querySelectorAll('.nivel-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
-function toggleMuscle(el){ document.querySelector('.full-body-btn').classList.remove('selected'); selectedMuscles=selectedMuscles.filter(x=>x!=='full_body'); el.classList.toggle('selected'); if(el.classList.contains('selected')){ if(!selectedMuscles.includes(el.dataset.m)) selectedMuscles.push(el.dataset.m); } else selectedMuscles=selectedMuscles.filter(x=>x!==el.dataset.m); }
-function toggleFullBody(el){ document.querySelectorAll('.muscle-btn').forEach(b=>b.classList.remove('selected')); selectedMuscles=[]; el.classList.toggle('selected'); if(el.classList.contains('selected')) selectedMuscles=['full_body']; }
+function setNivel(n,el){selectedNivel=n;document.querySelectorAll('.nivel-chip').forEach(c=>c.classList.remove('active'));el?.classList.add('active');}
+function toggleMuscle(el){el?.classList.toggle('selected');}
+function toggleFullBody(el){document.querySelectorAll('.muscle-btn').forEach(b=>b.classList.remove('selected'));el?.classList.toggle('selected');}
 function generarRec(){
-  if(!selectedMuscles.length){ showToast('Selecciona al menos un músculo'); return; }
-  const mult={principiante:.7,intermedio:1.0,avanzado:1.2}[selectedNivel];
-  let ejs=[]; selectedMuscles.forEach(m=>{ if(ejerciciosDB[m]) ejs=[...ejs,...ejerciciosDB[m]]; });
-  ejs=ejs.sort(()=>Math.random()-.5).slice(0,selectedMuscles[0]==='full_body'?6:Math.min(7,ejs.length));
-  const dur=Math.round(ejs.length*8*mult+10);
-  const nom=selectedMuscles.includes('full_body')?'Full Body':selectedMuscles.map(m=>capitalize(m)).join(' + ');
+  const p=window.currentProfile||{};
   const res=document.getElementById('rec-result');
-  res.innerHTML=`
-    <div class="sec-label">Rutina sugerida</div>
-    <div class="card card-accent" style="margin-bottom:14px">
-      <div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⚡ GENERADA PARA TI</div>
-      <div style="font-family:var(--font-d);font-size:26px;letter-spacing:1px;margin-bottom:8px">${nom}</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <span class="badge badge-green">⏱ ~${dur} min</span>
-        <span class="badge badge-blue">📊 ${capitalize(selectedNivel)}</span>
-        <span class="badge badge-gray">💪 ${ejs.length} ejercicios</span>
-      </div>
-    </div>
-    ${ejs.map((ej,i)=>`
-      <div class="ejercicio-card" style="margin-bottom:10px">
-        <div class="ej-top"><div>
-          <div class="ej-num">Ejercicio ${i+1}</div>
-          <div class="ej-name">${ej.nombre}</div>
-          <div class="ej-grupo">${ej.grupoMuscular}</div>
-        </div></div>
-        ${ej.planB?`<div class="ej-nota" style="border-left-color:var(--accent2);color:var(--muted)">🔄 Plan B: ${ej.planB}</div>`:''}
-        <div class="ej-stats">
-          <div class="ej-stat"><div class="ej-stat-val">${ej.series}</div><div class="ej-stat-lbl">Series</div></div>
-          <div class="ej-stat"><div class="ej-stat-val">${ej.repeticiones}</div><div class="ej-stat-lbl">Reps</div></div>
-          <div class="ej-stat"><div class="ej-stat-val">${ej.pesoSugerido}</div><div class="ej-stat-lbl">Peso</div></div>
-          <div class="ej-stat"><div class="ej-stat-val">${ej.descansoSegundos}s</div><div class="ej-stat-lbl">Descanso</div></div>
-        </div>
-        ${ej.nota?`<div class="ej-nota">💡 ${ej.nota}</div>`:''}
-      </div>
-    `).join('')}
-    <div style="padding:0 16px;display:flex;gap:10px;margin-bottom:24px">
-      <button class="btn-primary" style="flex:1;justify-content:center" onclick='usarRutinaHoy(${JSON.stringify(nom)},${JSON.stringify(ejs)})'>✓ Usar hoy</button>
-      <button class="btn-secondary" onclick="generarRec()">↺ Otra</button>
-    </div>`;
-  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  if(!res) return;
+  if(!p.objetivo){res.innerHTML='<div class="card">Completa tu perfil y selecciona un grupo muscular para recibir recomendaciones.</div>';return;}
+  res.innerHTML='<div class="card">Selecciona un grupo muscular para recibir recomendaciones.</div>';
 }
-function usarRutinaHoy(nom,ejs){
-  window._rutinaHoy = { nombre:nom, grupoPrincipal: selectedMuscles.join(' · '), duracionMinutos: 60, nivel: capitalize(selectedNivel), ejercicios: ejs.map(e=>({...e,completado:false})) };
-  saveRutinaLocal(window._rutinaHoy);
-  showToast('✅ '+nom+' guardada como rutina de hoy');
-  setTimeout(()=>goScreen('screen-rutina'),800);
-}
+function usarRutinaHoy(){ showToast('Primero genera una recomendación real desde el catálogo.'); }
 </script>
 
 </body>
