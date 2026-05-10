@@ -4,7 +4,13 @@
 const SUPABASE_URL     = 'https://ddjpeyewnoewylokagun.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ybc-hTQjieaFC405rVmrAw_fMl73_eU';
 
-window.db = window.db.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseSdk = window.supabase;
+
+if (!supabaseSdk || typeof supabaseSdk.createClient !== 'function') {
+  console.error('Supabase SDK no está cargado correctamente');
+} else {
+  window.db = supabaseSdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 // Usuario actual en memoria
 window.currentUser    = null;

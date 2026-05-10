@@ -667,7 +667,11 @@ const planificador = (() => {
   };
 })();
 
-// Función global para el router
-function renderPlanificador() {
+// Funciones globales para el router
+window.renderPlanificador = function renderPlanificador() {
   planificador.render();
-}
+};
+
+window.initPlanificador = function initPlanificador() {
+  planificador.render();
+};
