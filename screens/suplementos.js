@@ -1,12 +1,15 @@
 // screens/suplementos.js
-// DeFatFit v7 — Pantalla de suplementos
+// DeFatFit — Pantalla de suplementos
 
 async function renderSuplementos() {
   const container = document.getElementById('screen-suplementos');
   if (!container) return;
 
   const userId = window.currentUser?.id;
-  container.innerHTML = `<div class="loading-state"><div class="loader"></div><p>Cargando suplementos...</p></div>`;
+
+  container.innerHTML =
+    UI.topbar({ title: 'Suplementos', subtitle: 'Guía educativa · consulta a tu nutricionista' }) +
+    `<div class="screen-content" id="supl-content">${UI.loading('Cargando suplementos…')}</div>`;
 
   const [catalogo, misSupl] = await Promise.all([
     supplementService.obtenerSuplementos(),
@@ -14,42 +17,33 @@ async function renderSuplementos() {
   ]);
 
   const activosIds = new Set(misSupl.map(s => s.suplemento_id));
+  const content    = document.getElementById('supl-content');
+  if (!content) return;
 
-  container.innerHTML = `
-    <div class="screen-header">
-      <h1>Suplementos</h1>
-      <p class="screen-subtitle">Información educativa. Siempre valida con tu nutricionista.</p>
-    </div>
-
+  content.innerHTML = `
     ${misSupl.length > 0 ? `
-      <div class="supl-seccion">
-        <h2 class="supl-seccion-titulo">Mis suplementos activos</h2>
-        <div class="supl-activos-grid">
-          ${misSupl.map(us => _renderSuplActivoChip(us)).join('')}
-        </div>
+      <div class="sec-label">Mis suplementos activos</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        ${misSupl.map(us => `
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(200,241,53,.08);border:1px solid rgba(200,241,53,.2);border-radius:100px;font-size:13px">
+            <span style="color:var(--accent)">✓</span>
+            <span>${us.suplementos?.nombre || 'Suplemento'}</span>
+            ${us.horario ? `<span style="color:var(--muted);font-size:11px">${us.horario}</span>` : ''}
+          </div>`).join('')}
       </div>
     ` : ''}
 
-    <div class="supl-seccion">
-      <h2 class="supl-seccion-titulo">Catálogo</h2>
-      <div class="supl-cards">
-        ${catalogo.map(s => _renderSuplCard(s, activosIds.has(s.id), misSupl)).join('')}
-      </div>
+    <div class="sec-label">Catálogo</div>
+    <div class="supl-list">
+      ${catalogo.map(s => _renderSuplCard(s, activosIds.has(s.id), misSupl)).join('')}
     </div>
 
-    <div class="supl-disclaimer">
-      <p>⚠️ Esta información es solo educativa y no reemplaza la indicación de tu nutricionista o médico. Siempre consulta antes de comenzar cualquier suplementación.</p>
+    <div class="card" style="margin-top:16px">
+      <p style="font-size:13px;color:var(--muted);line-height:1.5">
+        ⚠️ Esta información es solo educativa y no reemplaza la indicación de tu nutricionista o médico.
+      </p>
     </div>
-  `;
-}
-
-function _renderSuplActivoChip(usuarioSupl) {
-  const nombre = usuarioSupl.suplementos?.nombre || 'Suplemento';
-  return `
-    <div class="supl-chip-activo">
-      <span>✓ ${nombre}</span>
-      ${usuarioSupl.horario ? `<small>${usuarioSupl.horario}</small>` : ''}
-    </div>
+    <div style="height:16px"></div>
   `;
 }
 
@@ -57,64 +51,37 @@ function _renderSuplCard(supl, activo, misSupl) {
   const miConfig = misSupl.find(s => s.suplemento_id === supl.id);
 
   return `
-    <div class="supl-card ${activo ? 'supl-activo' : ''}">
-      <div class="supl-card-header">
+    <div class="supl-card">
+      <div class="supl-icon">💊</div>
+      <div class="supl-info">
         <div class="supl-nombre">${supl.nombre}</div>
-        <label class="supl-toggle">
-          <input type="checkbox" ${activo ? 'checked' : ''}
-            onchange="toggleSuplementoUsuario('${supl.id}', this.checked)">
-          <span class="supl-toggle-track"></span>
+        <div class="supl-dosis">${supl.dosis_general || supl.descripcion || ''}</div>
+      </div>
+      <div class="supl-actions">
+        <label class="toggle-switch">
+          <input type="checkbox" ${activo ? 'checked' : ''} onchange="toggleSuplementoUsuario('${supl.id}', this.checked)">
+          <span class="toggle-slider"></span>
         </label>
       </div>
-
-      <div class="supl-descripcion">${supl.descripcion || ''}</div>
-
-      <div class="supl-detalle-grid">
-        <div class="supl-detalle-item">
-          <div class="supl-detalle-label">¿Para qué sirve?</div>
-          <div class="supl-detalle-valor">${supl.para_que_sirve || '—'}</div>
-        </div>
-        <div class="supl-detalle-item">
-          <div class="supl-detalle-label">¿Cómo tomarlo?</div>
-          <div class="supl-detalle-valor">${supl.como_tomarlo || '—'}</div>
-        </div>
-        <div class="supl-detalle-item">
-          <div class="supl-detalle-label">Dosis general</div>
-          <div class="supl-detalle-valor">${supl.dosis_general || '—'}</div>
-        </div>
-      </div>
-
-      ${supl.advertencia ? `
-        <div class="supl-advertencia">
-          ⚠️ ${supl.advertencia}
-        </div>
-      ` : ''}
-
-      ${activo ? `
-        <div class="supl-mi-config">
-          <div class="supl-config-label">Mi configuración</div>
-          <div class="supl-config-inputs">
-            <input class="form-input supl-input-dosis" type="text"
-              placeholder="Dosis personalizada..."
-              value="${miConfig?.dosis_personalizada || ''}"
-              onchange="guardarConfigSupl('${supl.id}', 'dosis', this.value)">
-            <input class="form-input supl-input-horario" type="text"
-              placeholder="Horario (ej: noche)"
-              value="${miConfig?.horario || ''}"
-              onchange="guardarConfigSupl('${supl.id}', 'horario', this.value)">
-          </div>
-        </div>
-      ` : ''}
     </div>
-  `;
+    ${activo ? `
+      <div style="background:var(--bg3);border-radius:0 0 var(--r) var(--r);padding:10px 16px;margin-top:-8px;display:flex;gap:8px">
+        <input class="form-input" style="flex:1;font-size:13px;padding:8px 12px" type="text"
+          placeholder="Dosis personalizada…"
+          value="${miConfig?.dosis_personalizada || ''}"
+          onchange="guardarConfigSupl('${supl.id}', 'dosis', this.value)">
+        <input class="form-input" style="flex:1;font-size:13px;padding:8px 12px" type="text"
+          placeholder="Horario (ej: noche)"
+          value="${miConfig?.horario || ''}"
+          onchange="guardarConfigSupl('${supl.id}', 'horario', this.value)">
+      </div>
+    ` : ''}`;
 }
 
 async function toggleSuplementoUsuario(suplId, activo) {
   const userId = window.currentUser?.id;
   if (!userId) return;
-
   const result = await supplementService.toggleSuplemento(userId, suplId, activo);
-
   if (result.ok) {
     window.mostrarToast?.(activo ? 'Suplemento agregado' : 'Suplemento removido', 'success');
     setTimeout(() => renderSuplementos(), 500);
@@ -123,18 +90,13 @@ async function toggleSuplementoUsuario(suplId, activo) {
   }
 }
 
-// Guarda cambios en config del suplemento (con debounce)
 const _configTimers = {};
 async function guardarConfigSupl(suplId, campo, valor) {
   clearTimeout(_configTimers[suplId + campo]);
   _configTimers[suplId + campo] = setTimeout(async () => {
     const userId = window.currentUser?.id;
     if (!userId) return;
-
-    const config = {};
-    if (campo === 'dosis') config.dosis = valor;
-    if (campo === 'horario') config.horario = valor;
-
+    const config = campo === 'dosis' ? { dosis: valor } : { horario: valor };
     await supplementService.toggleSuplemento(userId, suplId, true, config);
   }, 800);
 }
