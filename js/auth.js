@@ -84,6 +84,8 @@ async function entrarApp(user) {
   }
 
   window.currentProfile = perfil;
+  const suscripcion = await subscriptionService.obtenerSuscripcionActual(user.id);
+  window.currentSubscriptionLabel = suscripcion?.plan_nombre || 'Sin plan activo';
 
   // Si no completó el onboarding → mostrarlo
   if (!perfil?.onboarding_completo) {
@@ -107,6 +109,7 @@ async function entrarApp(user) {
   }
 
   window.initDashboard?.();
+  window._rutinaHoy = null;
   window.initRutina?.();
   window.initPerfil?.();
   window.initUsuario?.();

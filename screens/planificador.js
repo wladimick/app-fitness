@@ -11,6 +11,7 @@ const planificador = (() => {
   let _semanaOffset = 0;          // 0 = semana actual, 1 = próxima, -1 = anterior
   let _planSemana   = [];         // array de 7 días con su estado y rutina
   let _rutinas      = [];         // catálogo de rutinas disponibles
+  let _rutinasFavoritas = [];
   let _diaSeleccionado = null;    // fecha del día en edición
   let _userId = null;
 
@@ -44,6 +45,7 @@ const planificador = (() => {
       exerciseService.obtenerRutinasUsuario(_userId)
     ]);
     _rutinas = [...templates, ...propias];
+    _rutinasFavoritas = (propias || []).filter(r => r.es_favorita);
 
     // Cargar planificación de la semana actual
     const { data, error } = await window.db
@@ -82,7 +84,11 @@ const planificador = (() => {
 
         <!-- HEADER -->
         <div class="plan-header">
-          <h1>Planificar</h1>
+          <div>
+            <h1>Planificar</h1>
+            <div class="plan-subtitulo">${etiqueta}</div>
+          </div>
+          <button class="icon-btn menu-btn" onclick="openSidebar()" aria-label="Abrir menú"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
           <div class="plan-semana-nav">
             <button class="plan-nav-btn" onclick="planificador.navegarSemana(-1)">‹</button>
             <div class="plan-semana-label">
@@ -272,6 +278,16 @@ const planificador = (() => {
           <button onclick="planificador.cerrarSelector()">✕</button>
         </div>
 
+        <div class="plan-selector-seccion">
+          <div class="plan-selector-label">✍️ Escribir rutina manualmente</div>
+          <div class="form-row">
+            <input class="form-input" id="plan-manual-nombre" placeholder="Nombre de rutina">
+            <input class="form-input" id="plan-manual-duracion" type="number" placeholder="Duración (min)">
+          </div>
+          <input class="form-input" id="plan-manual-nota" placeholder="Nota opcional">
+          <button class="btn-primary" onclick="planificador.guardarManual()">Guardar en este día</button>
+        </div>
+
         <!-- OPCIÓN: DESCANSO -->
         <button class="plan-selector-opcion descanso-opcion"
           onclick="planificador.asignarDescanso()">
@@ -298,10 +314,16 @@ const planificador = (() => {
             `).join('')}
           </div>
         ` : ''}
+        ${_rutinasFavoritas.length > 0 ? `
+          <div class="plan-selector-seccion">
+            <div class="plan-selector-label">⭐ Seleccionar de favoritos</div>
+            ${_rutinasFavoritas.map(r => `<button class="plan-selector-opcion" onclick="planificador.asignarRutina('${r.id}')"><span class="plan-opc-icon">⭐</span><div><div class="plan-opc-nombre">${r.nombre}</div></div></button>`).join('')}
+          </div>
+        ` : ''}
 
         <!-- CATÁLOGO COMPLETO -->
         <div class="plan-selector-seccion">
-          <div class="plan-selector-label">📋 Catálogo de rutinas</div>
+          <div class="plan-selector-label">⚡ Sesión preestablecida recomendada</div>
           <div class="plan-selector-buscador">
             <input type="text" id="plan-buscador"
               class="form-input plan-input-buscar"
@@ -382,6 +404,15 @@ const planificador = (() => {
     const container = document.getElementById('screen-planificador');
     _renderVista(container);
     window.mostrarToast?.('Día marcado como descanso 😴', 'success');
+  }
+  async function guardarManual() {
+    const nombre = document.getElementById('plan-manual-nombre')?.value?.trim();
+    const dur = parseInt(document.getElementById('plan-manual-duracion')?.value) || null;
+    const nota = document.getElementById('plan-manual-nota')?.value?.trim() || null;
+    if (!nombre || !_diaSeleccionado) return;
+    const { data, error } = await window.db.from('rutinas').insert({ usuario_id: _userId, nombre, duracion_minutos: dur, notas: nota, es_template: false }).select('id').maybeSingle();
+    if (error || !data?.id) return;
+    await asignarRutina(data.id);
   }
 
   async function quitarDia(fecha) {
@@ -663,7 +694,8 @@ const planificador = (() => {
     copiarRutinaA,
     copiarSemanaAnterior,
     limpiarSemana,
-    filtrarRutinas
+    filtrarRutinas,
+    guardarManual
   };
 })();
 

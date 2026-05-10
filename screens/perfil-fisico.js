@@ -38,7 +38,7 @@ async function renderPerfilFisico() {
         <div class="bodypro-vacio-icon">📊</div>
         <div class="bodypro-vacio-texto">Sin mediciones registradas</div>
         <p>Agrega tu primera medición Body Pro para ver tu progreso.</p>
-        <button class="btn-primary" onclick="mostrarFormularioMedicion()">Registrar medición</button>
+        <button class="btn-primary" onclick="mostrarFormularioMedicion()">Agregar primera medición</button>
       </div>
     `}
 

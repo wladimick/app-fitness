@@ -12,15 +12,7 @@ function initUsuario() {
     tipo:       'Fuerza + Hipertrofia',
     prioridad:  'Torso',
     preferencias: [],
-    marcas: [
-      { ejercicio: 'Fondos lastrados',       marca: '+30 kg' },
-      { ejercicio: 'Dominada supina lastrada',marca: '+25 kg' },
-      { ejercicio: 'Sentadilla libre',        marca: '140 kg' },
-      { ejercicio: 'Press banca',             marca: '80-90 kg' },
-      { ejercicio: 'Remo mancuerna',          marca: '30 kg × 10' },
-      { ejercicio: 'Ext. cuádriceps',         marca: '70-77 kg' },
-      { ejercicio: 'Curl femoral',            marca: '70 kg' },
-    ],
+    marcas: [],
   };
 
   // Edad
@@ -37,6 +29,8 @@ function initUsuario() {
   if (nobj) nobj.textContent = edad
     ? `${capitalize(u.nivel)} · ${edad} años`
     : capitalize(u.nivel);
+  const planEl = document.getElementById('perfil-plan-actual');
+  if (planEl) planEl.textContent = window.currentSubscriptionLabel || 'Sin plan activo';
 
   // Badges
   const bn = document.getElementById('perfil-badge-nivel');
@@ -56,7 +50,7 @@ function initUsuario() {
   if (ed) ed.textContent = u.frecuencia;
 
   const epr = document.getElementById('perfil-prioridad');
-  if (epr) epr.textContent = u.prioridad;
+  if (epr) epr.textContent = u.prioridad || '—';
 
   // Edad en stats
   const eedad = document.getElementById('perfil-edad');
@@ -69,13 +63,13 @@ function initUsuario() {
   // Marcas
   const marcasEl = document.getElementById('perfil-marcas');
   if (marcasEl) {
-    marcasEl.innerHTML = u.marcas.map((m, i) => `
+    marcasEl.innerHTML = u.marcas.length ? u.marcas.map((m, i) => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;
         ${i < u.marcas.length - 1 ? 'border-bottom:1px solid var(--border)' : ''}">
         <span style="font-size:13px;color:var(--muted)">${m.ejercicio}</span>
         <span style="font-family:var(--font-m);font-size:14px;font-weight:600;color:var(--accent)">${m.marca}</span>
       </div>
-    `).join('');
+    `).join('') : `<div style="font-size:13px;color:var(--muted)">Sin marcas personales registradas.</div>`;
   }
 }
 
